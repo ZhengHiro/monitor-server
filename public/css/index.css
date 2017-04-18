@@ -1,0 +1,150 @@
+* {
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+ul, li {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+a {
+    text-decoration: none;
+    display: block;
+    color: #000000;
+}
+
+.top-bar {
+    height: 50px;
+    background: #00A0EA;
+}
+.top-bar p {
+    color: #FFFFFF;
+    line-height: 50px;
+    margin-left: 20px;
+}
+
+.first-menu {
+    width: 55px;
+    min-height: calc(100vh - 50px);
+    background: #293038;
+    float: left;
+    padding-top: 20px;
+}
+.first-menu li a {
+    color: #A9ACAF;
+}
+.first-menu li:hover>i, .first-menu li:hover>p, .first-menu li:hover>a {
+    color: #FFFFFF;
+}
+.first-menu li.active>i {
+    color: #ACDE6C;
+}
+.first-menu li.active>p {
+    color: #FFFFFF;
+}
+.first-menu li.active {
+    background: #00A0EA;
+}
+.first-menu li {
+    cursor: pointer;
+}
+.first-menu>li {
+    padding: 10px 0 3px;
+    text-align: center;
+    color: #A9ACAF;
+    position: relative;
+}
+.first-menu>li i {
+    font-size: 20px;
+}
+.first-menu>li p {
+    margin-bottom: 5px;
+    font-size: 14px;
+    font-family: "Microsoft Yahei";
+}
+
+.main-content {
+    position: absolute;
+    left: 55px;
+    right: 0;
+}
+.main-content.active {
+    left: 205px;
+}
+
+.first-content {
+    width: 800px;
+}
+.computer-list {
+    float: left;
+    margin: 10px;
+    margin-right: 20px;
+    padding: 5px;
+    min-width: 200px;
+    border: 1px solid #00A0EA;
+    border-radius: 8px;
+}
+.computer-list li {
+    position: relative;
+    padding-left: 40px;
+    cursor: pointer;
+}
+.computer-list li:before {
+    content: '';
+    width: 35px;
+    height: 15px;
+    position: absolute;
+    display: inline-block;
+    border-radius: 8px;
+    border: 1px solid #CCCCCC;
+    background: #CCCCCC;
+    left: 0;
+    top: 3px;
+}
+.computer-list li.active:before {
+    border: 1px solid #00A0EA;
+    background: #00A0EA;
+}
+.computer-list li>i {
+    margin-left: 10px;
+}
+.computer-list li>i:hover {
+    color: #00A0EA;
+}
+.computer-list input {
+    border: 1px solid #999999;
+    border-radius: 4px;
+}
+
+.middle {
+    float: left;
+}
+.screen-shot-wrap {
+    margin: 10px;
+    width: 500px;
+    padding: 10px;
+    border: 1px solid #00A0EA;
+    border-radius: 8px;
+}
+#screen-shot {
+    width: 100%;
+}
+
+.right {
+    float: left;
+}
+.process-list {
+    min-width: 200px;
+    margin: 10px;
+    margin-right: 20px;
+    padding: 5px;
+    border: 1px solid #00A0EA;
+    border-radius: 8px;
+    height: 400px;
+    overflow: scroll;
+    position: relative;
+}
+.process-list li {
+    margin-top: 5px;
+}
