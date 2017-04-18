@@ -6,26 +6,23 @@ var app = require('koa')()
   , mount = require('koa-mount')
   , onerror = require('koa-onerror')
   , session = require('koa-generic-session')
-  , redisStore = require('koa-redis')
-  , log = require('bt-co-common').log
-  , config = require('bt-co-common').config
-  , redis_connect = require('bt-co-common').redis_connect;
+  , redisStore = require('koa-redis');
 
 var multer = require('koa-multer');
 
 const router = require('./routes/');
 
 // global middlewares
-app.keys = ['doplhin', 'btclass_dolphin'];
-app.use(session({
-  store: redisStore({
-    host:  config.redis.host,
-	port: config.redis.port,
-	db: config.redis.webSessionDB,
-	auth_pass: config.redis.pass,
-	prefix: 'dolphin:'
-  })
-}));
+// app.keys = ['doplhin', 'btclass_dolphin'];
+// app.use(session({
+//   store: redisStore({
+//     host:  config.redis.host,
+// 	port: config.redis.port,
+// 	db: config.redis.webSessionDB,
+// 	auth_pass: config.redis.pass,
+// 	prefix: 'dolphin:'
+//   })
+// }));
 app.use(views('views', { root: __dirname + '/views', default: 'html' }));
 // app.use(multer({ dest: './uploads/'}));
 // app.use(require('koa-bodyparser')());

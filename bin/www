@@ -7,13 +7,12 @@
 var app = require('../app');
 var debug = require('debug')('demo:server');
 var http = require('http');
-var config = require('bt-co-common').config;
 
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.argv[2] || config.server.dolphin_port);
+var port = normalizePort(process.argv[2] || 4000);
 // app.set('port', port);
 
 /**
