@@ -17,9 +17,9 @@ exports.getPCInfo = function* (address) {
 };
 
 //心跳
-exports.getHeart = function* (address, time) {
+exports.setHeart = function* (address, time, remoteable) {
     try {
-        var result = yield DAO.getHeart(address, time);
+        var result = yield DAO.setHeart(address, time, remoteable);
     } catch (e) {
         console.log(e);
         throw('SERVICE: 处理心跳失败');
@@ -65,9 +65,9 @@ exports.addScreenShot = function* (address, time, targetName) {
 };
 
 //设置系统信息
-exports.setSystemInfo = function* (address, time, memory, cpuUsed, cpuFree) {
+exports.setSystemInfo = function* (address, time, memory, cpuUsed) {
     try {
-        var result = yield DAO.setSystemInfo(address, time, memory, cpuUsed, cpuFree);
+        var result = yield DAO.setSystemInfo(address, time, memory, cpuUsed);
     } catch (e) {
         console.log(e);
         throw('SERVICE: 设置系统信息失败');

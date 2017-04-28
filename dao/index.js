@@ -1,17 +1,24 @@
-var db = require('../custom-module/mongodb-module.js');
-var wrap = require('co-monk');
-var colInfo = wrap(db.get('monitor_info'));
-var colTime = wrap(db.get('monitor_time_info'));
-var colSwitch = wrap(db.get('monitor_switch_info'));
-var colProcess = wrap(db.get('monitor_process_info'));
-var colScreen = wrap(db.get('monitor_screen_info'));
-var colSystem = wrap(db.get('monitor_system_info'));
+var db = require('../config/mongoose');
+var co = require('co');
+
+var ComputerInfo = db.model('computer_info');
+var ProcessInfo = db.model('process_info');
+var ScreenInfo = db.model('screen_info');
+var SwitchInfo = db.model('switch_info');
+var SystemInfo = db.model('system_info');
+var TimeInfo = db.model('time_info');
+var OnlineInfo = db.model('online_info');
+var ProcessRate = db.model('process_rate');
+
+const HAS_PROCESS = 1;
+const HAS_SYSTEM = 2;
+const HAS_SCREEN = 4;
 
 
 //获取电脑信息
 exports.getPCInfo = function* (address) {
     try {
-        var rows = yield colInfo.find({
+        var rows = yield ComputerInfo.find({
             address: address
         });
     } catch (e) {
@@ -29,12 +36,17 @@ exports.addPCInfo = function* (address) {
         var info = yield this.getPCInfo(address);
         if (!info) {
             //获取电脑数量
-            var number = yield colInfo.count({});
-            yield colInfo.insert({
+            var number = yield ComputerInfo.count({});
+            var computer = new ComputerInfo({
                 address: address,
                 nickname: '',
-                index: number+1
+                index: number+1,
+                lastOnline: 0,
+                remoteTime: 0,
+                localTime: 0,
+                group: number+1
             });
+            yield computer.save();
         } else {
             return info.index;
         }
@@ -46,8 +58,10 @@ exports.addPCInfo = function* (address) {
     return (number+1);
 };
 
+
+
 //心跳
-exports.getHeart = function* (address, time) {
+exports.setHeart = function* (address, time, remoteable) {
     try {
         //获取当前时间的日期的时间戳
         var date = new Date(time * 1000);
@@ -56,33 +70,100 @@ exports.getHeart = function* (address, time) {
         date.setMinutes(0);
         var dateTime = parseInt(date.getTime()/1000);
 
+        if (remoteable) {
+            yield ComputerInfo.update({
+                address: address
+            }, {
+                $set: {
+                    lastOnline: time,
+                    localTime: 0
+                },
+                $inc: {
+                    remoteTime: 5
+                }
+            });
+        } else {
+            yield ComputerInfo.update({
+                address: address
+            }, {
+                $set: {
+                    lastOnline: time,
+                    remoteTime: 0
+                },
+                $inc: {
+                    localTime: 5
+                }
+            });
+        }
+
         //查找记录
-        var rows = yield colTime.find({
+        var rows = yield TimeInfo.find({
             address: address,
             dateTime: dateTime
         });
 
         //有则更新，无则插入
         if (!rows || rows.length == 0) {
-            yield colTime.insert({
-                address: address,
-                dateTime: dateTime,
-                screenShots: [],
-                processes: [],
-                totalTime: 2,
-                closeTime: [],
-                openTime: [],
-                system: []
-            });
+            var timeInfo;
+            if (remoteable) {
+                timeInfo = new TimeInfo({
+                    address: address,
+                    dateTime: dateTime,
+                    totalTime: 5,
+                    remoteTime: 5,
+                    localTime: 0
+                });
+            } else {
+                timeInfo = new TimeInfo({
+                    address: address,
+                    dateTime: dateTime,
+                    totalTime: 5,
+                    remoteTime: 0,
+                    localTime: 5
+                });
+            }
+
+            timeInfo.save();
         } else {
-            yield colTime.update({
+            if (remoteable) {
+                yield TimeInfo.update({
+                    address: address,
+                    dateTime: dateTime
+                }, {
+                    $inc: {
+                        totalTime: 5,
+                        remoteTime: 5
+                    }
+                });
+            } else {
+                yield TimeInfo.update({
+                    address: address,
+                    dateTime: dateTime
+                }, {
+                    $inc: {
+                        totalTime: 5,
+                        localTime: 5
+                    }
+                });
+            }
+        }
+
+        rows = yield OnlineInfo.find({
+            address: address,
+            time: time
+        });
+
+        //无则插入
+        if (!rows || rows.length == 0) {
+            var onlineInfo;
+            onlineInfo = new OnlineInfo({
                 address: address,
-                dateTime: dateTime
-            }, {
-                $inc: {
-                    totalTime: 2
-                }
+                time: time,
+                remoteable: remoteable,
+                status: 0
             });
+
+            onlineInfo.save();
         }
     } catch (e) {
         console.log(e);
@@ -95,33 +176,37 @@ exports.getHeart = function* (address, time) {
 //设置开关机时间
 exports.setSwitchInfo = function* (address, time, openTime, closeTime) {
     try {
+        var switchInfo;
+
         //查找记录
-        var rows = yield colSwitch.find({
+        var rows = yield SwitchInfo.find({
             address: address,
             time: openTime
         });
 
         //有则跳过，无则插入
         if (!rows || rows.length == 0) {
-            yield colSwitch.insert({
+            switchInfo = new SwitchInfo({
                 address: address,
                 time: openTime,
                 type: 'open'
             });
+            yield switchInfo.save();
         }
 
-        rows = yield colSwitch.find({
+        rows = yield SwitchInfo.find({
             address: address,
             time: closeTime
         });
 
         //有则跳过，无则插入
         if (!rows || rows.length == 0) {
-            yield colSwitch.insert({
+            switchInfo = new SwitchInfo({
                 address: address,
                 time: closeTime,
                 type: 'close'
             });
+            yield switchInfo.save();
         }
     } catch (e) {
         console.log(e);
@@ -132,24 +217,120 @@ exports.setSwitchInfo = function* (address, time, openTime, closeTime) {
 };
 
 //设置进程信息
-exports.setProcesses = function* (address, time, processes) {
+exports.setProcesses = function* (address, time, processes, loopTime = 0) {
+    var that = this;
     try {
-        //查找记录
-        var rows = yield colProcess.find({
+        var rows = yield OnlineInfo.find({
             address: address,
-            time: time
+            time: {$lte: time + 5, $gte: time - 5}
+        }).sort({
+            time: -1
         });
-
-        //有则跳过，无则插入
-        if (!rows || rows.length == 0) {
-            yield colProcess.insert({
-                address: address,
-                time: time,
-                processes: processes
-            });
+        if (!rows) {
+            return ;
         }
-    } catch (e) {
-        console.log(e);
+        var tag = false;
+        for (let i = 0, iL = rows.length; i < iL; i++) {
+            var onlineinfo = rows[i];
+
+            if (onlineinfo && !(onlineinfo.status & HAS_PROCESS)) {
+                //最高率分析
+                //获取当前时间的日期的时间戳
+                var date = new Date(time * 1000);
+                date.setHours(0);
+                date.setSeconds(0);
+                date.setMinutes(0);
+                var dateTime = parseInt(date.getTime()/1000);
+
+                for (let j = 0, jL = processes.length; j < jL; j++) {
+                    var processRateRow = yield ProcessRate.find({
+                        address: address,
+                        dateTime: dateTime,
+                        processName: processes[j].processName
+                    });
+                    processRateRow = processRateRow && processRateRow[0];
+                    if (!processRateRow) {
+                        var processRate = new ProcessRate({
+                            address: address,
+                            dateTime: dateTime,
+                            processName: processes[j].processName,
+                            totalMem: parseInt(processes[j].mem)
+                        });
+                        yield processRate.save();
+                    } else {
+                        yield ProcessRate.update({
+                            _id: processRateRow._id
+                        }, {
+                            $inc: {
+                                totalMem: parseInt(processes[j].mem)
+                            }
+                        })
+                    }
+                }
+
+                tag = true;
+
+                //进程分析
+                var oldRows = yield ProcessInfo.find({
+                    address: address,
+                    time: {$gte: onlineinfo.time - 60}
+                }).sort({
+                    time: -1
+                }).limit(1);
+                var addProcess = [], delProcess = [], totalProcess = [];
+                if (oldRows && oldRows[0]) {
+                    var allOldProcess = oldRows[0].addProcess.concat(oldRows[0].process);
+
+                    //找新增
+                    for (let j = 0; j < processes.length; j++) {
+                        var normalTag = false;
+                        for (let k = 0; k < allOldProcess.length; k++) {
+                            if (processes[j].processId == allOldProcess[k].processId) {
+                                totalProcess.push(processes[j]);
+                                allOldProcess.splice(k,1);
+                                processes.splice(j,1);
+                                normalTag = true;
+                                break;
+                            }
+                        }
+                        if (!normalTag) {
+                            addProcess.push(processes[j]);
+                            processes.splice(j,1);
+                        }
+                    }
+                    delProcess = allOldProcess;
+                } else {
+                    addProcess = processes;
+                    delProcess = [];
+                    totalProcess = [];
+                }
+
+                var process = new ProcessInfo({
+                    address: address,
+                    time: onlineinfo.time,
+                    addProcess: addProcess,
+                    delProcess: delProcess,
+                    process: totalProcess
+                });
+                yield process.save();
+                yield OnlineInfo.update({
+                    address: address,
+                    time: onlineinfo.time
+                },{
+                    $set: {
+                        status: onlineinfo.status + HAS_PROCESS
+                    }
+                });
+                break;
+            }
+        }
+        if (!tag && loopTime <= 4) {
+            setTimeout(function() {
+                co(that.setProcesses(address, time, processes, loopTime+1));
+            }, 2000);
+        }
+    } catch(e) {
+        console.error(e);
         throw('DAO: 设置进程信息失败');
     }
 
@@ -157,24 +338,48 @@ exports.setProcesses = function* (address, time, processes) {
 };
 
 //添加截图
-exports.addScreenShot = function* (address, time, targetName) {
+exports.addScreenShot = function* (address, time, targetName, loopTime = 0) {
+    var that = this;
     try {
-        //查找记录
-        var rows = yield colScreen.find({
+        var rows = yield OnlineInfo.find({
             address: address,
-            time: time
+            time: {$lte: time + 5, $gte: time - 5}
+        }).sort({
+            time: -1
         });
-
-        //有则跳过，无则插入
-        if (!rows || rows.length == 0) {
-            yield colScreen.insert({
-                address: address,
-                time: time,
-                targetName: targetName
-            });
+        if (!rows) {
+            return ;
         }
-    } catch (e) {
-        console.log(e);
+        var tag = false;
+        for (let i = 0, iL = rows.length; i < iL; i++) {
+            var onlineinfo = rows[i];
+
+            if (onlineinfo && !(onlineinfo.status & HAS_SCREEN)) {
+                tag = true;
+                var screen = new ScreenInfo({
+                    address: address,
+                    time: onlineinfo.time,
+                    targetName: targetName
+                });
+                yield screen.save();
+                yield OnlineInfo.update({
+                    address: address,
+                    time: onlineinfo.time
+                },{
+                    $set: {
+                        status: onlineinfo.status + HAS_SCREEN
+                    }
+                });
+                break;
+            }
+        }
+        if (!tag && loopTime <= 4) {
+            setTimeout(function() {
+                co(that.addScreenShot(address, time, targetName, loopTime+1));
+            }, 2000);
+        }
+    } catch(e) {
+        log.error(e);
         throw('DAO: 添加截图失败');
     }
 
@@ -182,36 +387,62 @@ exports.addScreenShot = function* (address, time, targetName) {
 };
 
 //设置系统信息
-exports.setSystemInfo = function* (address, time, memory, cpuUsed, cpuFree) {
+exports.setSystemInfo = function* (address, time, memory, cpuUsed, loopTime = 0) {
+    var that = this;
     try {
-        //查找记录
-        var rows = yield colSystem.find({
+        var rows = yield OnlineInfo.find({
             address: address,
-            time: time
+            time: {$lte: time + 5, $gte: time - 5}
+        }).sort({
+            time: -1
         });
-
-        //有则跳过，无则插入
-        if (!rows || rows.length == 0) {
-            yield colSystem.insert({
-                address: address,
-                time: time,
-                memory: memory,
-                cpuUsed: cpuUsed,
-                cpuFree: cpuFree
-            });
+        if (!rows) {
+            return ;
         }
-    } catch (e) {
-        console.log(e);
+        var tag = false;
+        for (let i = 0, iL = rows.length; i < iL; i++) {
+            var onlineinfo = rows[i];
+
+            if (onlineinfo && !(onlineinfo.status & HAS_SYSTEM)) {
+                tag = true;
+                var system = new SystemInfo({
+                    address: address,
+                    time: onlineinfo.time,
+                    memory: memory,
+                    cpuUsed: cpuUsed
+                });
+                yield system.save();
+                yield OnlineInfo.update({
+                    address: address,
+                    time: onlineinfo.time
+                },{
+                    $set: {
+                        status: onlineinfo.status + HAS_SYSTEM
+                    }
+                });
+                break;
+            }
+        }
+        if (!tag && loopTime <= 4) {
+            setTimeout(function() {
+                co(that.setSystemInfo(address, time, memory, cpuUsed, loopTime+1));
+            }, 2000);
+        }
+    } catch(e) {
+        log.error(e);
         throw('DAO: 设置系统信息失败');
     }
 
     return 'success';
 };
 
+
+
+
 //获取电脑信息
 exports.getAllPCInfo = function* () {
     try {
-        var rows = yield colInfo.find({});
+        var rows = yield ComputerInfo.find({});
     } catch (e) {
         console.log(e);
         throw('DAO: 获取所有电脑信息失败');
@@ -223,7 +454,7 @@ exports.getAllPCInfo = function* () {
 //获取一段时间的系统信息
 exports.getSystemInfo = function* (address, startTime, endTime) {
     try {
-        var rows = yield colSystem.find({
+        var rows = yield SystemInfo.find({
             address: address,
             time: {
                 $lte : endTime,
@@ -241,7 +472,7 @@ exports.getSystemInfo = function* (address, startTime, endTime) {
 //获取一段时间的屏幕截图
 exports.getScreenShot = function* (address, startTime, endTime) {
     try {
-        var rows = yield colScreen.find({
+        var rows = yield ScreenInfo.find({
             address: address,
             time: {
                 $lte : endTime,
@@ -259,7 +490,7 @@ exports.getScreenShot = function* (address, startTime, endTime) {
 //获取一段时间的进程信息
 exports.getProcessInfo = function* (address, startTime, endTime) {
     try {
-        var rows = yield colProcess.find({
+        var rows = yield ProcessInfo.find({
             address: address,
             time: {
                 $lte : endTime,
@@ -277,7 +508,7 @@ exports.getProcessInfo = function* (address, startTime, endTime) {
 //获取一段时间内的在线时间
 exports.getOnlineTime = function* (address, startTime, endTime) {
     try {
-        var rows = yield colTime.find({
+        var rows = yield TimeInfo.find({
             address: address,
             dateTime: {
                 $lte : endTime,
@@ -294,9 +525,8 @@ exports.getOnlineTime = function* (address, startTime, endTime) {
 
 //设置计算机昵称
 exports.setNickName = function* (address, nickname) {
-    console.log(address, nickname);
     try {
-        var rows = yield colInfo.update({
+        var rows = yield ComputerInfo.update({
             address: address
         }, {
             $set: {

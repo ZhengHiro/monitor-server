@@ -256,9 +256,9 @@ window.onload = function() {
                     var cpu = [];
                     value.systemInfo.forEach(function(row) {
                         date = new Date(row.time * 1000);
-                        if(row.cpuUsed > 100) {
-                            row.cpuUsed = 100;
-                        }
+                        // if(row.cpuUsed > 100) {
+                        //     row.cpuUsed = 100;
+                        // }
                         cpu.push({
                             name: date.toString(),
                             value: [

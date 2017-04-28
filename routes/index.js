@@ -11,9 +11,10 @@ router.post('/heart', body(), function* (next) {
 	var data = this.request.fields;
 	var address = data.address;
 	var time = data.nowTime;
+	var remoteable = data.remoteable;
 
 	try {
-        yield service.getHeart(address, time);
+        yield service.setHeart(address, time, remoteable);
     } catch (e) {
 		console.log(e);
 		this.body = 'failure';
@@ -102,10 +103,9 @@ router.post('/system-info', body(), function* (next) {
     var time = fields.nowTime;
     var memory = fields.memory;
     var cpuUsed = fields.cpuUsed;
-    var cpuFree = fields.cpuFree;
 
     try {
-        yield service.setSystemInfo(address, time, memory, cpuUsed, cpuFree);
+        yield service.setSystemInfo(address, time, memory, cpuUsed);
     } catch (e) {
         console.log(e);
         this.body = 'failure';
