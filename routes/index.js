@@ -50,6 +50,10 @@ router.post('/process-info', body(), function* (next) {
 	var time = data.nowTime;
 	var processes = data.processes;
 
+	processes.forEach(function(value) {
+	    value.mem = parseInt(value.mem);
+    });
+
     try {
         yield service.setProcesses(address, time, processes);
     } catch (e) {
@@ -69,17 +73,22 @@ router.post('/screen-shot', body(), function* (next) {
 
 	var PCInfo = yield service.getPCInfo(address);
 
-	try {
-		fs.accessSync('./public/uploads/screen-' + PCInfo.index, fs.constants.F_OK)
+    try {
+        fs.accessSync('./client/dist/uploads', fs.constants.F_OK)
     } catch(e) {
-		yield cfs.mkdir('./public/uploads/screen-' + PCInfo.index);
+        yield cfs.mkdir('./client/dist/uploads');
+    }
+	try {
+		fs.accessSync('./client/dist/uploads/screen-' + PCInfo.index, fs.constants.F_OK)
+    } catch(e) {
+		yield cfs.mkdir('./client/dist/uploads/screen-' + PCInfo.index);
 	}
 
 
     try {
 		for (let i = 0, iL = files.length; i < iL; i++) {
-            let targetName = './public/uploads/screen-' + PCInfo.index + '/' + files[i].name;
-            let path = './static/uploads/screen-' + PCInfo.index + '/' + files[i].name;
+            let targetName = './client/dist/uploads/screen-' + PCInfo.index + '/' + files[i].name;
+            let path = './uploads/screen-' + PCInfo.index + '/' + files[i].name;
             let time = files[i].name.match(/[0-9]{10}/)[0];
             let sourceName = files[i].path;
 
@@ -119,26 +128,54 @@ router.post('/system-info', body(), function* (next) {
 router.get('/', function *(next) {
     yield this.render('index');
 });
+
 //渲染主页
 router.get('/index', function *(next) {
     yield this.render('index');
 });
+
 //渲染历史记录
 router.get('/history', function *(next) {
     yield this.render('history');
+});
+
+
+//获取某一天的进程占用率
+router.get('/process-rate', body(), function* (next) {
+    var dateTime = parseInt(this.query.dateTime);
+    var date = new Date(dateTime*1000);
+    date.setHours(0);
+    date.setMinutes(0);
+    date.setSeconds(0);
+    dateTime = Math.floor(date.getTime()/1000);
+    var address = this.query.address;
+
+    try {
+        var result = yield service.getProcessRate(address, dateTime);
+    } catch (e) {
+        console.log(e);
+        throw('获取进程占用率失败')
+    }
+
+    this.body = {
+        status: 200,
+        data: result,
+        message: 'success'
+    };
 });
 
 //获取一段时间内的所有监控信息
 router.get('/monitor-info', body(), function* (next) {
     var startTime = parseInt(this.query.startTime) || 0;
     var endTime = parseInt(this.query.endTime);
+    var address = this.query.address;
 
     if (!endTime) {
     	endTime = Math.floor(new Date().getTime() / 1000);
 	}
 
     try {
-        var result = yield service.getMonitorInfo(startTime, endTime);
+        var result = yield service.getMonitorInfo(address, startTime, endTime);
     } catch (e) {
         console.log(e);
         throw('获取监控信息失败')

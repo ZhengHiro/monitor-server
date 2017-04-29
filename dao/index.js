@@ -469,6 +469,24 @@ exports.getSystemInfo = function* (address, startTime, endTime) {
     return rows;
 };
 
+//获取一段时间的在线信息
+exports.getOnlineInfo = function* (address, startTime, endTime) {
+    try {
+        var rows = yield OnlineInfo.find({
+            address: address,
+            time: {
+                $lte : endTime,
+                $gte : startTime
+            }
+        });
+    } catch (e) {
+        console.log(e);
+        throw('DAO: 获取在线信息失败');
+    }
+
+    return rows;
+};
+
 //获取一段时间的屏幕截图
 exports.getScreenShot = function* (address, startTime, endTime) {
     try {
@@ -536,6 +554,21 @@ exports.setNickName = function* (address, nickname) {
     } catch (e) {
         console.log(e);
         throw('DAO: 获取一段时间内的在线时间失败');
+    }
+
+    return rows;
+};
+
+//获取内存占用率
+exports.getProcessRate = function* (address, dateTime) {
+    try {
+        var rows = yield ProcessRate.find({
+            address: address,
+            dateTime: dateTime
+        });
+    } catch (e) {
+        console.log(e);
+        throw('DAO: 获取内存占用率失败');
     }
 
     return rows;

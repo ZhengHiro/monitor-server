@@ -23,7 +23,7 @@ const router = require('./routes/');
 // 	prefix: 'dolphin:'
 //   })
 // }));
-app.use(views('views', { root: __dirname + '/views', default: 'html' }));
+app.use(views('views', { root: __dirname + '/client/dist', default: 'html' }));
 // app.use(multer({ dest: './uploads/'}));
 // app.use(require('koa-bodyparser')());
 // app.use(json());
@@ -36,7 +36,7 @@ app.use(function *(next){
   console.log('%s %s - %s', this.method, this.url, ms);
 });
 
-app.use(mount('/static', require('koa-static')(__dirname + '/public')));
+app.use(mount('/', require('koa-static')(__dirname + '/client/dist')));
 
 app.use(function* (next) {
     try {

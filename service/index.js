@@ -76,31 +76,28 @@ exports.setSystemInfo = function* (address, time, memory, cpuUsed) {
     return result;
 };
 
+
 //获取一段时间内的监控信息
-exports.getMonitorInfo = function* (startTime, endTime) {
+exports.getMonitorInfo = function* (address, startTime, endTime) {
     try {
-        var allPC = yield DAO.getAllPCInfo();
-        var result = [];
-        for (let i = 0, iL = allPC.length; i < iL; i++) {
-            let [systemInfo, screenInfo, processInfo] = yield [
-                DAO.getSystemInfo(allPC[i].address, startTime, endTime),
-                DAO.getScreenShot(allPC[i].address, startTime, endTime),
-                DAO.getProcessInfo(allPC[i].address, startTime, endTime)
-            ];
-            result.push({
-                address: allPC[i].address,
-                nickname: allPC[i].nickname,
-                systemInfo: systemInfo,
-                screenInfo: screenInfo,
-                processInfo: processInfo
-            });
-        }
+        var [onlineInfo, systemInfo, screenInfo, processInfo] = yield [
+            DAO.getOnlineInfo(address,startTime, endTime),
+            DAO.getSystemInfo(address, startTime, endTime),
+            DAO.getScreenShot(address, startTime, endTime),
+            DAO.getProcessInfo(address, startTime, endTime)
+        ];
     } catch (e) {
         console.log(e);
         throw('SERVICE: 获取监控信息失败');
     }
 
-    return result;
+    return {
+        address: address,
+        onlineInfo: onlineInfo,
+        systemInfo: systemInfo,
+        screenInfo: screenInfo,
+        processInfo: processInfo
+    };
 };
 
 //获取在线时间
@@ -134,6 +131,18 @@ exports.setNickName = function* (address, nickname) {
     } catch (e) {
         console.log(e);
         throw('SERVICE: 设置计算机昵称失败');
+    }
+
+    return result;
+};
+
+//获取内存占用率
+exports.getProcessRate = function* (address, dateTime) {
+    try {
+        var result = yield DAO.getProcessRate(address, dateTime);
+    } catch (e) {
+        console.log(e);
+        throw('SERVICE: 获取内存占用率失败');
     }
 
     return result;
