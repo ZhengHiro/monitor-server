@@ -227,18 +227,15 @@ router.get('/all-pc', body(), function* (next) {
 	};
 });
 
-//设置计算机昵称
-router.post('/pc-nickname', body(), function* (next) {
+//设置计算机信息
+router.post('/pc-info', body(), function* (next) {
     var fields = this.request.fields;
     var address = fields.address;
     var nickname = fields.nickname;
-
-    if (!nickname) {
-    	this.throw(400, '昵称不能为空');
-	}
+    var group = parseInt(fields.group) || 0;
 
     try {
-        var result = yield service.setNickName(address, nickname);
+        var result = yield service.setPCInfo(address, nickname, group);
     } catch (e) {
         console.log(e);
         throw('设置计算机昵称失败');

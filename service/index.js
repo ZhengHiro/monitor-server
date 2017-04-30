@@ -124,10 +124,10 @@ exports.getAllPCInfo = function* () {
     return result;
 };
 
-//设置计算机昵称
-exports.setNickName = function* (address, nickname) {
+//设置计算机信息
+exports.setPCInfo = function* (address, nickname, group) {
     try {
-        var result = yield DAO.setNickName(address, nickname);
+        var result = yield DAO.setPCInfo(address, nickname, group);
     } catch (e) {
         console.log(e);
         throw('SERVICE: 设置计算机昵称失败');

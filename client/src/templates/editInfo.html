@@ -1,0 +1,68 @@
+<div ng-controller="EditInfoCtrl">
+    <div class="row">
+        <div class="col-lg-12">
+            <rd-widget>
+                <rd-widget-header icon="fa-users" title="计算机">
+                    <!--<input type="text" placeholder="Search" class="form-control input-sm" />-->
+                </rd-widget-header>
+                <rd-widget-body classes="large no-padding">
+                    <div class="table-responsive">
+                        <rd-loading ng-if="isLoadingComputers"></rd-loading>
+                        <form name="computer-list">
+                            <table class="table computer-table" ng-if="!isLoadingComputers">
+                                <thead>
+                                <tr>
+                                    <th>MAC地址</th>
+                                    <th>昵称</th>
+                                    <th>小组</th>
+                                    <th>操作</th>
+                                </thead>
+                                <tbody >
+                                <tr ng-repeat="(key, value) in computers">
+                                    <td ng-bind="value.address"></td>
+                                    <td ng-if="key != editIndex" ng-bind="value.nickname"></td>
+                                    <td ng-if="key != editIndex" ng-bind="value.group"></td>
+                                    <td ng-show="key == editIndex">
+                                        <input type="text" name="nickname" ng-model="editNickname" ng-model-options="{ getterSetter: true }">
+                                    </td>
+                                    <td ng-show="key == editIndex">
+                                        <input type="number" name="group" ng-model="editGroup" ng-model-options="{ getterSetter: true }">
+                                    </td>
+                                    <td ng-if="key != editIndex">
+                                        <button type="button" class="btn btn-primary" ng-click="edit(key)">编辑</button>
+                                    </td>
+                                    <td ng-show="key == editIndex">
+                                        <button type="button" class="btn btn-success" ng-click="save(key, editNickname, editGroup)">保存</button>
+                                        <button type="button" class="btn btn-danger" ng-click="edit(-1)">取消</button>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </form>
+
+
+                    </div>
+                </rd-widget-body>
+            </rd-widget>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+            </div>
+            <div class="modal-body">
+                ...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>

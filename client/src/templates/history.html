@@ -1,0 +1,177 @@
+<div ng-controller="HistoryCtrl">
+    <div ng-controller="OnlineTimeCtrl">
+        <div class="row">
+            <div class="col-lg-4">
+                <rd-widget>
+                    <rd-widget-header icon="fa-users" title="计算机">
+                        <!--<input type="text" placeholder="Search" class="form-control input-sm" />-->
+                    </rd-widget-header>
+                    <rd-widget-body classes="large no-padding">
+                        <div class="table-responsive">
+                            <rd-loading ng-if="isLoadingComputers"></rd-loading>
+                            <table class="table computer-table" ng-if="!isLoadingComputers">
+                                <thead>
+                                <tr>
+                                    <th>MAC地址</th>
+                                    <th>昵称</th>
+                                </thead>
+                                <tbody >
+                                <tr ng-click="selectComputer(key)" ng-repeat="(key, value) in computers" ng-class="{'bg-primary': key == selectedComputer}">
+                                    <td ng-bind="value.address"></td>
+                                    <td ng-bind="value.nickname"></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </rd-widget-body>
+                </rd-widget>
+            </div>
+            <div class="col-lg-4" >
+                <rd-widget class="custom-widget-wrap">
+                    <rd-widget-header icon="fa-users" title="在线时间">
+                        <div class="date-selector">
+                            <span ng-click="lastYear()" class="glyphicon glyphicon-chevron-left"></span>
+                            <span class="current-year">{{ selectYear }}年</span>
+                            <span ng-click="nextYear()" class="glyphicon glyphicon-chevron-right"></span>
+                            <span ng-click="lastMonth()" class="glyphicon glyphicon-chevron-left"></span>
+                            <span class="current-month">{{ selectMonth }}月</span>
+                            <span ng-click="nextMonth()" class="glyphicon glyphicon-chevron-right"></span>
+                        </div>
+                        <!--<input type="text" placeholder="Search" class="form-control input-sm" />-->
+                    </rd-widget-header>
+                    <rd-widget-body classes="large no-padding">
+                        <rd-loading ng-if="isLoadingComputers"></rd-loading>
+                        <div id="online-time-chart">
+
+                        </div>
+                    </rd-widget-body>
+                </rd-widget>
+            </div>
+            <div class="col-lg-4">
+                <rd-widget class="custom-widget-wrap">
+                    <rd-widget-header icon="fa-users" title="时长分布">
+                        <!--<input type="text" placeholder="Search" class="form-control input-sm" />-->
+                    </rd-widget-header>
+                    <rd-widget-body classes="large no-padding">
+                        <rd-loading ng-if="isLoadingComputers"></rd-loading>
+                        <div id="local-time-chart">
+
+                        </div>
+                    </rd-widget-body>
+                </rd-widget>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-12 custom-widget-wrap">
+                <rd-widget >
+                    <rd-widget-header icon="fa-tv" title="系统信息">
+                        <!--<input type="text" placeholder="Search" class="form-control input-sm" />-->
+                    </rd-widget-header>
+                    <rd-widget-body classes="large no-padding">
+                        <rd-loading ng-if="isLoadingComputers || isLoadingSystemOnce"></rd-loading>
+                        <div id="system-chart"></div>
+                    </rd-widget-body>
+                </rd-widget>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-6">
+                <rd-widget>
+                    <rd-widget-header icon="fa-eye" title="屏幕截图">
+                        <!--<input type="text" placeholder="Search" class="form-control input-sm" />-->
+                    </rd-widget-header>
+                    <rd-widget-body classes="large no-padding">
+                        <rd-loading ng-if="isLoadingComputers"></rd-loading>
+                        <img class="screen-shot" ng-if="!isLoadingComputers" ng-src="{{ targetImage }}">
+                    </rd-widget-body>
+                </rd-widget>
+            </div>
+            <div class="col-lg-6" class="custom-widget-wrap">
+                <rd-widget>
+                    <rd-widget-header icon="fa-eye" title="当天占用率最高进程">
+                        <!--<input type="text" placeholder="Search" class="form-control input-sm" />-->
+                    </rd-widget-header>
+                    <rd-widget-body classes="large no-padding">
+                        <rd-loading ng-if="isLoadingComputers"></rd-loading>
+                        <div id="process-rate-chart"></div>
+                    </rd-widget-body>
+                </rd-widget>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-4">
+                <rd-widget>
+                    <rd-widget-header icon="fa-server" title="原有进程">
+                        <!--<input type="text" placeholder="Search" class="form-control input-sm" />-->
+                    </rd-widget-header>
+                    <rd-widget-body classes="medium no-padding">
+                        <rd-loading ng-if="isLoadingComputers"></rd-loading>
+                        <table class="table" ng-if="!isLoadingComputers">
+                            <thead>
+                            <tr>
+                                <th>进程名称</th>
+                                <th>内存占用率</th>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat="(key, value) in processes | orderBy: '-mem'">
+                                <td ng-bind="value.processName"></td>
+                                <td ng-bind="value.mem"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </rd-widget-body>
+                </rd-widget>
+            </div>
+            <div class="col-lg-4">
+                <rd-widget>
+                    <rd-widget-header icon="fa-server" title="新增进程">
+                        <!--<input type="text" placeholder="Search" class="form-control input-sm" />-->
+                    </rd-widget-header>
+                    <rd-widget-body classes="medium no-padding">
+                        <rd-loading ng-if="isLoadingComputers"></rd-loading>
+                        <table class="table" ng-if="!isLoadingComputers">
+                            <thead>
+                            <tr>
+                                <th>进程名称</th>
+                                <th>内存占用率</th>
+                            </thead>
+                            <tbody>
+                            <tr class="bg-success" ng-repeat="(key, value) in addProcesses | orderBy: '-mem'">
+                                <td ng-bind="value.processName"></td>
+                                <td ng-bind="value.mem"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </rd-widget-body>
+                </rd-widget>
+            </div>
+            <div class="col-lg-4">
+                <rd-widget>
+                    <rd-widget-header icon="fa-server" title="结束进程">
+                        <!--<input type="text" placeholder="Search" class="form-control input-sm" />-->
+                    </rd-widget-header>
+                    <rd-widget-body classes="medium no-padding">
+                        <rd-loading ng-if="isLoadingComputers"></rd-loading>
+                        <table class="table" ng-if="!isLoadingComputers">
+                            <thead>
+                            <tr>
+                                <th>进程名称</th>
+                                <th>内存占用率</th>
+                            </thead>
+                            <tbody>
+                            <tr class="bg-warning" ng-repeat="(key, value) in delProcesses | orderBy: '-mem'">
+                                <td ng-bind="value.processName"></td>
+                                <td ng-bind="value.mem"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </rd-widget-body>
+                </rd-widget>
+            </div>
+        </div>
+    </div>
+
+</div>

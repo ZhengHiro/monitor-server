@@ -541,19 +541,20 @@ exports.getOnlineTime = function* (address, startTime, endTime) {
     return rows;
 };
 
-//设置计算机昵称
-exports.setNickName = function* (address, nickname) {
+//设置计算机信息
+exports.setPCInfo = function* (address, nickname, group) {
     try {
         var rows = yield ComputerInfo.update({
             address: address
         }, {
             $set: {
-                nickname: nickname
+                nickname: nickname,
+                group: group
             }
         });
     } catch (e) {
         console.log(e);
-        throw('DAO: 获取一段时间内的在线时间失败');
+        throw('DAO: 设置信息失败');
     }
 
     return rows;
