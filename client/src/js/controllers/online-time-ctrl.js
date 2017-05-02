@@ -81,8 +81,7 @@ function OnlineTimeCtrl($rootScope, $scope, $timeout, $http) {
                     nameMap: 'cn'
                 },
                 cellSize: [35, 35],
-                top: 'middle',
-                left: 400
+                top: 'middle'
             },
             series: {
                 type: 'heatmap',
@@ -229,7 +228,7 @@ function OnlineTimeCtrl($rootScope, $scope, $timeout, $http) {
             method: 'GET',
             url: './online-time',
             params: {
-                address: $rootScope.selectedAddress,
+                address: $scope.selectedAddress,
                 startTime: startTime,
                 endTime: endTime
             }
@@ -275,7 +274,7 @@ function OnlineTimeCtrl($rootScope, $scope, $timeout, $http) {
             method: 'GET',
             url: './monitor-info',
             params: {
-                address: $rootScope.selectedAddress,
+                address: $scope.selectedAddress,
                 startTime: time,
                 endTime: time+60*60*24
             }
@@ -357,7 +356,7 @@ function OnlineTimeCtrl($rootScope, $scope, $timeout, $http) {
             method: 'GET',
             url: './process-rate',
             params: {
-                address: $rootScope.selectedAddress,
+                address: $scope.selectedAddress,
                 dateTime: time
             }
         }).then(function (response) {
