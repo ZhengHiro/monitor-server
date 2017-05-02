@@ -70,7 +70,21 @@ exports.setHeart = function* (address, time, remoteable) {
         date.setMinutes(0);
         var dateTime = parseInt(date.getTime()/1000);
 
-        if (remoteable) {
+        var computerInfo = yield ComputerInfo.find({ address: address });
+        var lastOnline = computerInfo[0].lastOnline;
+        if (new Date().getTime() / 1000 - lastOnline > 100) {
+            yield ComputerInfo.update({
+                address: address
+            }, {
+                $set: {
+                    lastOnline: time,
+                    localTime: 0
+                },
+                $inc: {
+                    remoteTime: 0
+                }
+            });
+        } else if (remoteable) {
             yield ComputerInfo.update({
                 address: address
             }, {

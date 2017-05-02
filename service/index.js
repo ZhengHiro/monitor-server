@@ -86,6 +86,7 @@ exports.getMonitorInfo = function* (address, startTime, endTime) {
             DAO.getScreenShot(address, startTime, endTime),
             DAO.getProcessInfo(address, startTime, endTime)
         ];
+        
     } catch (e) {
         console.log(e);
         throw('SERVICE: 获取监控信息失败');

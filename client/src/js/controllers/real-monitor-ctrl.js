@@ -6,9 +6,9 @@ angular.module('RDash')
     .controller('RealMonitorCtrl', ['$rootScope', '$scope', '$interval', '$timeout', RealMonitorCtrl]);
 
 function RealMonitorCtrl($rootScope, $scope, $interval, $timeout) {
-    if ($rootScope.RealTimeSystemChart) {
-        $interval.cancel($rootScope.freshLineT);
-        $rootScope.RealTimeSystemChart.dispose();
+    if ($scope.RealTimeSystemChart) {
+        $interval.cancel($scope.freshLineT);
+        $scope.RealTimeSystemChart.dispose();
     }
     $scope.config = {
         legend: {
@@ -48,10 +48,11 @@ function RealMonitorCtrl($rootScope, $scope, $interval, $timeout) {
     };
 
     $timeout(function(){
-        $rootScope.RealTimeSystemChart = echarts.init(document.getElementById('real-time-system'));
-        $rootScope.freshLineT = $interval(function() {
-            $scope.config.series = $rootScope.realTimeSystem;
-            $rootScope.RealTimeSystemChart.setOption($scope.config);
+        $scope.RealTimeSystemChart = echarts.init(document.getElementById('real-time-system'));
+
+        $scope.freshLineT = $interval(function() {
+            $scope.config.series = $scope.realTimeSystem;
+            $scope.RealTimeSystemChart.setOption($scope.config);
         }, 2000);
     });
 

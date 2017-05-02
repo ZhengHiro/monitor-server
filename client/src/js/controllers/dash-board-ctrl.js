@@ -84,9 +84,6 @@ function DashboardCtrl($rootScope, $scope, $timeout, $interval, $http) {
                         msg: '当前没有计算机在线'
                     });
                 }
-                $timeout(function() {
-                    $scope.$apply();
-                });
             } else {
                 console.log(response);
             }
