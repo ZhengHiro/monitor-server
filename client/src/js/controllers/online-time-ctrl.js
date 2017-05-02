@@ -3,9 +3,9 @@
  */
 
 angular.module('RDash')
-    .controller('OnlineTimeCtrl', ['$rootScope', '$scope', '$interval', '$timeout', '$http', OnlineTimeCtrl]);
+    .controller('OnlineTimeCtrl', ['$rootScope', '$scope', '$timeout', '$http', OnlineTimeCtrl]);
 
-function OnlineTimeCtrl($rootScope, $scope, $interval, $timeout, $http) {
+function OnlineTimeCtrl($rootScope, $scope, $timeout, $http) {
     /**
      * Set Time
      */

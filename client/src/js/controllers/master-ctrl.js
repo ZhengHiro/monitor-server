@@ -39,4 +39,7 @@ function MasterCtrl($rootScope, $scope, $cookieStore, $interval, $http) {
 
     $scope.RealTimeSystemChart = null;
     $scope.freshLineT = null;
+
+    $scope.dashFreshComputerT = null;
+    $scope.dashGetMonitorT = null;
 }

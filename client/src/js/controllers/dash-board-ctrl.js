@@ -3,9 +3,9 @@
  */
 
 angular.module('RDash')
-    .controller('DashboardCtrl', ['$scope', '$rootScope', '$cookieStore', '$interval', '$http', DashboardCtrl]);
+    .controller('DashboardCtrl', ['$scope', '$rootScope', '$timeout', '$interval', '$http', DashboardCtrl]);
 
-function DashboardCtrl($rootScope, $scope, $cookieStore, $interval, $http) {
+function DashboardCtrl($rootScope, $scope, $timeout, $interval, $http) {
     var DANGER_REMOTE_TIME = 60*60*24; // 一天
     var DANGER_ONLINE_TIME = 60*60*72; // 三天
     var DANGER_OFFLINE_TIME = 60*60*72; // 三天
@@ -17,8 +17,10 @@ function DashboardCtrl($rootScope, $scope, $cookieStore, $interval, $http) {
     $scope.selectedComputer = -1;
     $scope.isLoadingComputers = true;
 
-    $interval(function() {
-        $scope.getComputerList()
+    $interval.cancel($scope.dashFreshComputerT);
+
+    $scope.dashFreshComputerT = $interval(function() {
+        $scope.getComputerList();
     }, 2000);
     $scope.getComputerList = function () {
         $http({
@@ -82,7 +84,9 @@ function DashboardCtrl($rootScope, $scope, $cookieStore, $interval, $http) {
                         msg: '当前没有计算机在线'
                     });
                 }
-                $scope.$apply();
+                $timeout(function() {
+                    $scope.$apply();
+                });
             } else {
                 console.log(response);
             }
@@ -93,15 +97,13 @@ function DashboardCtrl($rootScope, $scope, $cookieStore, $interval, $http) {
         });
     };
 
-    var T;
-
     $scope.selectComputer = function(index) {
         if ($scope.computers[index].isOnline == false || $scope.selectedComputer == index) {
             return ;
         }
         $scope.isLoadingSystem = true;
-        clearInterval(T);
-        T = setInterval(function() {
+        $interval.cancel($scope.dashGetMonitorT);
+        $scope.dashGetMonitorT = $interval(function() {
             var startTime = Math.floor(new Date().getTime()/1000) - 5 * 60;
             var endTime = Math.floor(new Date().getTime()/1000);
             $scope.getComputerMonitor($scope.computers[index].address, startTime, endTime);

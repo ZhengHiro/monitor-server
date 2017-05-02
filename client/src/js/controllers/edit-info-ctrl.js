@@ -3,9 +3,13 @@
  */
 
 angular.module('RDash')
-    .controller('EditInfoCtrl', ['$scope', '$rootScope', '$cookieStore', '$interval', '$http', EditInfoCtrl]);
+    .controller('EditInfoCtrl', ['$scope', '$interval', '$http', EditInfoCtrl]);
 
-function EditInfoCtrl($rootScope, $scope, $cookieStore, $interval, $http) {
+function EditInfoCtrl($scope, $interval, $http) {
+    $interval.cancel($scope.dashFreshComputerT);
+    $interval.cancel($scope.dashGetMonitorT);
+
+
     /**
      * Get computer list
      */

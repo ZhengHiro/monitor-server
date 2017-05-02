@@ -3,10 +3,11 @@
  */
 
 angular.module('RDash')
-    .controller('HistoryCtrl', ['$scope', '$rootScope', '$cookieStore', '$interval', '$timeout', '$http', HistoryCtrl]);
+    .controller('HistoryCtrl', ['$scope', '$http', '$interval', HistoryCtrl]);
 
-function HistoryCtrl($rootScope, $scope, $cookieStore, $timeout, $interval, $http) {
-
+function HistoryCtrl($scope, $http, $interval) {
+    $interval.cancel($scope.dashFreshComputerT);
+    $interval.cancel($scope.dashGetMonitorT);
 
 
     /**
@@ -15,9 +16,6 @@ function HistoryCtrl($rootScope, $scope, $cookieStore, $timeout, $interval, $htt
     $scope.selectedComputer = -1;
     $scope.isLoadingComputers = true;
 
-    $interval(function() {
-        $scope.getComputerList()
-    }, 2000);
     $scope.getComputerList = function () {
         $http({
             method: 'GET',
@@ -39,7 +37,7 @@ function HistoryCtrl($rootScope, $scope, $cookieStore, $timeout, $interval, $htt
         });
     };
 
-    var T;
+    $scope.getComputerList();
 
     $scope.selectComputer = function(index) {
         $scope.isLoadingSystem = true;
