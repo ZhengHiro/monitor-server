@@ -10,7 +10,7 @@ function OnlineTimeCtrl($rootScope, $scope, $interval, $timeout, $http) {
      * Set Time
      */
     $scope.selectYear = 2017;
-    $scope.selectMonth = 4;
+    $scope.selectMonth = 5;
     $scope.lastYear = function() {
         $scope.selectYear--;
         customGetTime();
@@ -41,10 +41,12 @@ function OnlineTimeCtrl($rootScope, $scope, $interval, $timeout, $http) {
     };
     var startTime, endTime;
     function customGetTime() {
-        var startDate = $scope.selectYear + '-' + $scope.selectMonth;
-        var endDate = $scope.selectYear + '-' + ($scope.selectMonth+1);
-        startTime = Math.floor(new Date(startDate).getTime() / 1000);
-        endTime = Math.floor(new Date(endDate).getTime() / 1000);
+        var startDate = new Date($scope.selectYear + '-' + $scope.selectMonth);
+        var endDate = new Date($scope.selectYear + '-' + ($scope.selectMonth+1));
+        startDate.setHours(0);
+        endDate.setHours(0);
+        startTime = Math.floor(startDate.getTime() / 1000);
+        endTime = Math.floor(endDate.getTime() / 1000);
     }
     customGetTime();
 
@@ -60,7 +62,7 @@ function OnlineTimeCtrl($rootScope, $scope, $interval, $timeout, $http) {
             tooltip: {
                 position: 'top',
                 formatter: function(params) {
-                    return (params.data[0] + '<br/> 本地登录:' + Math.round(params.data[1]/60)+ '分钟' + '<br/> 远程登录:' + Math.round(params.data[2]/60)+ '分钟');
+                    return (params.data[0] + '<br/> 本地登录:' + Math.round(params.data[1]/60)+ '分钟' + '<br/> 远程登录:' + Math.round(params.data[2]/60)+ '分钟' + '<br/> 工作时间:' + Math.round(params.data[3]/60)+ '分钟');
                 }
             },
             visualMap: {
@@ -78,7 +80,9 @@ function OnlineTimeCtrl($rootScope, $scope, $interval, $timeout, $http) {
                 monthLabel: {
                     nameMap: 'cn'
                 },
-                cellSize: [35, 35]
+                cellSize: [35, 35],
+                top: 'middle',
+                left: 400
             },
             series: {
                 type: 'heatmap',
@@ -87,21 +91,38 @@ function OnlineTimeCtrl($rootScope, $scope, $interval, $timeout, $http) {
         };
 
         localTimeOption = {
-            tooltip : {
+            tooltip: {
                 trigger: 'item',
                 formatter: "{a} <br/>{b} : {c} ({d}%)"
             },
             legend: {
                 orient: 'vertical',
                 left: 'left',
-                data: ['本地登录','远程登录']
+                data: ['本地登录','远程登录', '工作时间', '挂机时间']
             },
-            series : [
+            series: [
                 {
                     name: '在线方式',
                     type: 'pie',
-                    radius : '55%',
+                    radius : ['60%', '75%'],
                     center: ['50%', '50%'],
+                    itemStyle: {
+                        emphasis: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                },
+                {
+                    name: '系统分析',
+                    type: 'pie',
+                    radius : [0, '45%'],
+                    label: {
+                        normal: {
+                            position: 'inner'
+                        }
+                    },
                     itemStyle: {
                         emphasis: {
                             shadowBlur: 10,
@@ -190,6 +211,10 @@ function OnlineTimeCtrl($rootScope, $scope, $interval, $timeout, $http) {
                 { value: params.data[1], name:'本地登录'},
                 { value: params.data[2], name:'远程登录'},
             ];
+            localTimeOption.series[1].data = [
+                { value: params.data[3], name:'工作时间'},
+                { value: params.data[4] - params.data[3], name:'挂机时间'},
+            ];
             localTimeChart.setOption(localTimeOption);
             $scope.getComputerMonitor(params.data[0]);
             $scope.getProcessRate(params.data[0]);
@@ -218,6 +243,7 @@ function OnlineTimeCtrl($rootScope, $scope, $interval, $timeout, $http) {
                         echarts.format.formatTime('yyyy-MM-dd', data[i].dateTime*1000),
                         data[i].localTime,
                         data[i].remoteTime,
+                        data[i].workingTime,
                         data[i].totalTime
                     ]);
                 }
@@ -239,7 +265,9 @@ function OnlineTimeCtrl($rootScope, $scope, $interval, $timeout, $http) {
     $scope.isLoadingSystemOnce = false;
 
     $scope.getComputerMonitor = function (date) {
-        var time = Math.floor(new Date(date).getTime()/1000);
+        var customDate = new Date(date);
+        customDate.setHours(0);
+        var time = Math.floor(customDate.getTime()/1000);
         $scope.isLoadingSystemOnce = true;
         $scope.$apply();
 
@@ -318,7 +346,9 @@ function OnlineTimeCtrl($rootScope, $scope, $interval, $timeout, $http) {
     };
 
     $scope.getProcessRate = function (date) {
-        var time = Math.floor(new Date(date).getTime()/1000);
+        var customDate = new Date(date);
+        customDate.setHours(0);
+        var time = Math.floor(customDate.getTime()/1000);
         processRateOption.series[0].data = [];
         processRateOption.legend.data = [];
 

@@ -313,14 +313,39 @@ exports.setProcesses = function* (address, time, processes, loopTime = 0) {
                     process: totalProcess
                 });
                 yield process.save();
-                yield OnlineInfo.update({
-                    address: address,
-                    time: onlineinfo.time
-                },{
-                    $set: {
-                        status: onlineinfo.status + HAS_PROCESS
-                    }
-                });
+
+
+                //有进程增减判断成工作状态
+                if ((addProcess.length != 0 || delProcess.length != 0) && onlineinfo.isWorking) {
+                    yield OnlineInfo.update({
+                        address: address,
+                        time: onlineinfo.time
+                    },{
+                        $set: {
+                            status: onlineinfo.status + HAS_PROCESS,
+                            isWorking: 1
+                        }
+                    });
+
+                    yield TimeInfo.update({
+                        address: address,
+                        dateTime: dateTime
+                    }, {
+                        $inc: {
+                            workingTime: 5
+                        }
+                    });
+                } else {
+                    yield OnlineInfo.update({
+                        address: address,
+                        time: onlineinfo.time
+                    },{
+                        $set: {
+                            status: onlineinfo.status + HAS_PROCESS
+                        }
+                    });
+                }
+
                 break;
             }
         }
@@ -412,14 +437,62 @@ exports.setSystemInfo = function* (address, time, memory, cpuUsed, loopTime = 0)
                     cpuUsed: cpuUsed
                 });
                 yield system.save();
-                yield OnlineInfo.update({
+
+                //判断是否在线
+                var historyInfo = yield SystemInfo.find({
                     address: address,
-                    time: onlineinfo.time
-                },{
-                    $set: {
-                        status: onlineinfo.status + HAS_SYSTEM
+                    time: {
+                        $lte: onlineinfo.time + 180,
+                        $gt: onlineinfo.time
                     }
                 });
+
+                var sumMemory = 0, sumCPU = 0, avgMemory = 0, avgCPU = 0;
+                for (let j = 0, jL = historyInfo.length; j < jL; j++) {
+                    sumMemory += historyInfo[j].memory;
+                    sumCPU += historyInfo[j].cpuUsed;
+                }
+                if (historyInfo.length > 0) {
+                    avgMemory = sumMemory / historyInfo.length;
+                    avgCPU = sumCPU / historyInfo.length;
+                }
+                if ((Math.abs(avgCPU - cpuUsed) / avgCPU >= 0.3 || Math.abs(avgMemory - memory) / avgMemory >= 0.3) && !onlineinfo.isWorking) {
+                    yield OnlineInfo.update({
+                        address: address,
+                        time: onlineinfo.time
+                    },{
+                        $set: {
+                            status: onlineinfo.status + HAS_SYSTEM,
+                            isWorking: 1
+                        }
+                    });
+
+                    //获取当前时间的日期的时间戳
+                    var date = new Date(time * 1000);
+                    date.setHours(0);
+                    date.setSeconds(0);
+                    date.setMinutes(0);
+                    var dateTime = parseInt(date.getTime()/1000);
+                    yield TimeInfo.update({
+                        address: address,
+                        dateTime: dateTime
+                    }, {
+                        $inc: {
+                            workingTime: 5
+                        }
+                    });
+                } else {
+                    yield OnlineInfo.update({
+                        address: address,
+                        time: onlineinfo.time
+                    },{
+                        $set: {
+                            status: onlineinfo.status + HAS_SYSTEM
+                        }
+                    });
+                }
+
+
                 break;
             }
         }

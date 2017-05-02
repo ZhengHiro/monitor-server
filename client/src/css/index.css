@@ -36,3 +36,7 @@
     width: 100%;
     height: 350px;
 }
+
+.widget .widget-body.no-padding {
+    overflow: hidden;
+}

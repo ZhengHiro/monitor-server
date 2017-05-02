@@ -3,6 +3,7 @@ var Schema = new mongoose.Schema({
     address: String,
     time: Number,
     remoteable: Number,
-    status: Number
+    status: Number,
+    isWorking: Number
 });
 module.exports = mongoose.model('online_info', Schema);

@@ -4,6 +4,7 @@ var Schema = new mongoose.Schema({
     dateTime: Number,
     totalTime: Number,
     remoteTime: Number,
-    localTime: Number
+    localTime: Number,
+    workingTime: Number
 });
 module.exports = mongoose.model('time_info', Schema);
