@@ -20,6 +20,7 @@
 								<th>昵称</th>
 								<th>是否在线</th>
 								<th>是否本地登录</th>
+								<th>是否工作</th>
 								<th>在线时长</th>
 							</thead>
 							<tbody >
@@ -36,6 +37,12 @@
 									<span class="text-success"><i class="fa fa-check"></i></span>
 								</td>
 								<td ng-if="!value.isLocal">
+									<span class="text-danger"><i class="fa fa-ban"></i></span>
+								</td>
+								<td ng-if="value.isWorking">
+									<span class="text-success"><i class="fa fa-check"></i></span>
+								</td>
+								<td ng-if="!value.isWorking">
 									<span class="text-danger"><i class="fa fa-ban"></i></span>
 								</td>
 								<td ng-if="value.isOnline">

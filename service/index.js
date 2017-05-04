@@ -117,6 +117,10 @@ exports.getOnlineTime = function* (address, startTime, endTime) {
 exports.getAllPCInfo = function* () {
     try {
         var result = yield DAO.getAllPCInfo();
+        for (var i = 0, iL = result.length; i < iL; i++) {
+            var isWorking = yield DAO.checkWorking(result[i].address);
+            result[i].isWorking = isWorking;
+        }
     } catch (e) {
         console.log(e);
         throw('SERVICE: 获取所有电脑信息失败');
@@ -188,7 +192,6 @@ exports.getStatisticsInfo = function* (address, type) {
                 rates[processRate[i].processName] += processRate[i].totalMem;
             }
         }
-        console.log(rates);
         processRate = [];
         for (var key in rates) {
             processRate.push({
@@ -209,4 +212,51 @@ exports.getStatisticsInfo = function* (address, type) {
         workingTime: workingTime,
         processRate: processRate
     };
+};
+
+//获取小组统计数据
+exports.getStatisticsInfoByGroup = function* (group, type) {
+    var endTime = Math.floor(new Date().getTime() / 1000), startTime;
+    var endDate = new Date();
+    endDate.setHours(0);
+    endDate.setMinutes(0);
+    endDate.setSeconds(0);
+    endDateTime = Math.floor(endDate.getTime()/1000);
+    if (type == 'day') {
+        startTime = endDateTime - 24*60*60;
+    } else if (type == 'week') {
+        startTime = endDateTime - 7*24*60*60;
+    } else if (type == 'month') {
+        startTime = endDateTime - 30*24*60*60;
+    }
+    try {
+        var computers = yield DAO.getPCByGroups(group);
+        var result = [];
+        for (var i = 0, iL = computers.length; i < iL; i++) {
+            var onlineTime = yield DAO.getOnlineTime(computers[i].address,startTime, endTime);
+
+            var totalTime = 0, remoteTime = 0, localTime = 0, workingTime = 0;
+            for (let j = 0, jL = onlineTime.length; j < jL; j++) {
+                totalTime += onlineTime[j].totalTime;
+                remoteTime += onlineTime[j].remoteTime;
+                localTime += onlineTime[j].localTime;
+                workingTime += onlineTime[j].workingTime;
+            }
+
+            result.push({
+                address: computers[i].address,
+                nickname: computers[i].nickname,
+                totalTime: totalTime,
+                remoteTime: remoteTime,
+                localTime: localTime,
+                workingTime: workingTime,
+            });
+        }
+
+    } catch (e) {
+        console.log(e);
+        throw('SERVICE: 获取监控信息失败');
+    }
+
+    return result;
 };

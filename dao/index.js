@@ -71,7 +71,10 @@ exports.setHeart = function* (address, time, remoteable) {
         var dateTime = parseInt(date.getTime()/1000);
 
         var computerInfo = yield ComputerInfo.find({ address: address });
-        var lastOnline = computerInfo[0].lastOnline;
+        var lastOnline = 0;
+        if (computerInfo[0]) {
+            lastOnline = computerInfo[0].lastOnline;
+        }
         if (new Date().getTime() / 1000 - lastOnline > 100) {
             yield ComputerInfo.update({
                 address: address
@@ -678,4 +681,41 @@ exports.getProcessRateByTime = function* (address, startTime, endTime) {
     }
 
     return rows;
+};
+
+//获取小组电脑
+exports.getPCByGroups = function* (group) {
+    try {
+        var rows = yield ComputerInfo.find({group: group});
+    } catch (e) {
+        console.log(e);
+        throw('DAO: 获取内存占用率失败');
+    }
+
+    return rows;
+};
+
+//判断是否在线
+exports.checkWorking = function* (address) {
+    try {
+        var endTime = Math.floor(new Date().getTime()/1000);
+        var startTime = endTime - 100;
+        var rows = yield OnlineInfo.find({
+            address: address,
+            time: {
+                $lte : endTime,
+                $gte : startTime
+            }
+        }).sort({
+            time: -1
+        });
+        if (rows && rows[0] && rows[0].isWorking) {
+            return true;
+        } else {
+            return false;
+        }
+    } catch (e) {
+        console.log(e);
+        throw('DAO: 获取内存占用率失败');
+    }
 };

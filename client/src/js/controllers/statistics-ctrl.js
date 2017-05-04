@@ -9,6 +9,7 @@ function StatisticsCtrl($scope, $http, $interval, $timeout) {
     $interval.cancel($scope.dashFreshComputerT);
     $interval.cancel($scope.dashGetMonitorT);
 
+    $scope.firstInit = true;
 
     $scope.userType = 'user';
     $scope.searchType = 'day';
@@ -18,7 +19,11 @@ function StatisticsCtrl($scope, $http, $interval, $timeout) {
     };
     $scope.setSearchType = function(type) {
         $scope.searchType = type;
-        $scope.getStatisticsInfo();
+        if ($scope.userType == 'user') {
+            $scope.getStatisticsInfo();
+        } else if ($scope.userType == 'group') {
+            $scope.getGroupStatisticsInfo();
+        }
     };
 
     /**
@@ -40,7 +45,6 @@ function StatisticsCtrl($scope, $http, $interval, $timeout) {
             if (result.status == 200) {
                 $scope.groups = [];
                 $scope.computers = result.data;
-                $scope.selectComputer(0);
 
                 var groups = {};
                 for (var i = 0, iL = result.data.length; i < iL; i++) {
@@ -55,6 +59,9 @@ function StatisticsCtrl($scope, $http, $interval, $timeout) {
                         computers: groups[key]
                     });
                 }
+
+                $scope.selectComputer(0);
+                $scope.selectGroup(0);
             } else {
                 console.log(response);
             }
@@ -74,13 +81,26 @@ function StatisticsCtrl($scope, $http, $interval, $timeout) {
         $scope.getStatisticsInfo();
     };
 
+    $scope.selectGroup = function(index) {
+        $scope.selectedGroup = index;
+        $scope.selectedGroupName = $scope.groups[index].name;
+
+        $scope.getGroupStatisticsInfo();
+    };
+
 
 
     var processRateChart, processRateOption, localTimeChart, localTimeOption, workingTimeChart, workingTimeOption;
+    var groupOnlineChart, groupOnlineChartOption, groupLocalChart, groupLocalChartOption, groupWorkingChart, groupWorkingChartOption;
     $timeout(function() {
         processRateChart = echarts.init(document.getElementById('process-rate-chart'));
         localTimeChart = echarts.init(document.getElementById('local-time-chart'));
         workingTimeChart = echarts.init(document.getElementById('working-time-chart'));
+
+        groupOnlineChart = echarts.init(document.getElementById('group-online-chart'));
+        groupLocalChart = echarts.init(document.getElementById('group-local-chart'));
+        groupWorkingChart = echarts.init(document.getElementById('group-working-chart'));
+
 
         processRateOption = {
             tooltip : {
@@ -169,7 +189,93 @@ function StatisticsCtrl($scope, $http, $interval, $timeout) {
                     data: []
                 }
             ]
-        }
+        };
+
+        groupOnlineChartOption = {
+            tooltip: {
+                trigger: 'item',
+                formatter: "{a} <br/>{b} : {c}秒 ({d}%)"
+            },
+            legend: {
+                orient: 'vertical',
+                left: 'left',
+                data: []
+            },
+            series: [
+                {
+                    name: '在线时间',
+                    type: 'pie',
+                    radius : '55%',
+                    center: ['50%', '50%'],
+                    itemStyle: {
+                        emphasis: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    },
+                    data: []
+                }
+            ]
+        };
+
+        groupLocalChartOption = {
+            tooltip: {
+                trigger: 'item',
+                formatter: "{a} <br/>{b} : {c}秒 ({d}%)"
+            },
+            legend: {
+                orient: 'vertical',
+                left: 'left',
+                data: []
+            },
+            series: [
+                {
+                    name: '本地登录时间',
+                    type: 'pie',
+                    radius : '55%',
+                    center: ['50%', '50%'],
+                    itemStyle: {
+                        emphasis: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    },
+                    data: []
+                }
+            ]
+        };
+
+        groupWorkingChartOption = {
+            tooltip: {
+                trigger: 'item',
+                formatter: "{a} <br/>{b} : {c}秒 ({d}%)"
+            },
+            legend: {
+                orient: 'vertical',
+                left: 'left',
+                data: []
+            },
+            series: [
+                {
+                    name: '工作时间',
+                    type: 'pie',
+                    radius : '55%',
+                    center: ['50%', '50%'],
+                    itemStyle: {
+                        emphasis: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    },
+                    data: []
+                }
+            ]
+        };
+
+        $scope.firstInit = false;
     });
 
 
@@ -239,5 +345,48 @@ function StatisticsCtrl($scope, $http, $interval, $timeout) {
         }, function (response) {
             console.log(response);
         });
-    }
+    };
+
+    $scope.getGroupStatisticsInfo = function() {
+        $scope.isLoadingData = true;
+
+        $http({
+            method: 'GET',
+            url: './group/statistics-info',
+            params: {
+                group: $scope.selectedGroupName,
+                type: $scope.searchType
+            }
+        }).then(function (response) {
+            $scope.isLoadingData = false;
+
+            var result = response.data;
+            if (result.status == 200) {
+                var data = result.data;
+
+                groupOnlineChartOption.legend.data = [];
+                groupOnlineChartOption.series[0].data = [];
+                groupLocalChartOption.legend.data = [];
+                groupLocalChartOption.series[0].data = [];
+                groupWorkingChartOption.legend.data = [];
+                groupWorkingChartOption.series[0].data = [];
+                for (var i = 0, iL = data.length; i < iL; i++) {
+                    groupOnlineChartOption.legend.data.push(data[i].nickname || data[i].address);
+                    groupOnlineChartOption.series[0].data.push({ value: data[i].totalTime, name: data[i].nickname || data[i].address});
+                    groupLocalChartOption.legend.data.push(data[i].nickname || data[i].address);
+                    groupLocalChartOption.series[0].data.push({ value: data[i].localTime, name: data[i].nickname || data[i].address});
+                    groupWorkingChartOption.legend.data.push(data[i].nickname || data[i].address);
+                    groupWorkingChartOption.series[0].data.push({ value: data[i].workingTime, name: data[i].nickname || data[i].address});
+                }
+
+                groupOnlineChart.setOption(groupOnlineChartOption);
+                groupLocalChart.setOption(groupLocalChartOption);
+                groupWorkingChart.setOption(groupWorkingChartOption);
+            } else {
+                console.log(response);
+            }
+        }, function (response) {
+            console.log(response);
+        });
+    };
 }

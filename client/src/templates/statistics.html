@@ -33,7 +33,7 @@
                                 <th>计算机数量</th>
                             </thead>
                             <tbody >
-                            <tr ng-click="selectGroup(key)" ng-repeat="(key, value) in groups" ng-class="{'bg-primary': key == selectedComputer}">
+                            <tr ng-click="selectGroup(key)" ng-repeat="(key, value) in groups" ng-class="{'bg-primary': key == selectedGroup}">
                                 <td ng-bind="value.name"></td>
                                 <td ng-bind="value.computers.length"></td>
                             </tr>
@@ -43,7 +43,7 @@
                 </rd-widget-body>
             </rd-widget>
         </div>
-        <div class="col-lg-6" class="custom-widget-wrap">
+        <div class="col-lg-6" ng-show="userType == 'user'" class="custom-widget-wrap">
             <rd-widget>
                 <rd-widget-header icon="fa-eye" title="占用率最高进程">
                     <div class="btn-group btn-group-xs">
@@ -58,9 +58,24 @@
                 </rd-widget-body>
             </rd-widget>
         </div>
+        <div class="col-lg-6" ng-show="userType == 'group' || firstInit" class="custom-widget-wrap">
+            <rd-widget>
+                <rd-widget-header icon="fa-eye" title="在线时间">
+                    <div class="btn-group btn-group-xs">
+                        <button type="button" ng-click="setSearchType('day')" class="btn btn-default" ng-class="{'btn-primary': searchType == 'day'}">最近一天</button>
+                        <button type="button" ng-click="setSearchType('week')" class="btn btn-default" ng-class="{'btn-primary': searchType == 'week'}">最近七天</button>
+                        <button type="button" ng-click="setSearchType('month')" class="btn btn-default" ng-class="{'btn-primary': searchType == 'month'}">最近三十天</button>
+                    </div>
+                </rd-widget-header>
+                <rd-widget-body classes="large no-padding">
+                    <rd-loading ng-if="isLoadingData"></rd-loading>
+                    <div id="group-online-chart"></div>
+                </rd-widget-body>
+            </rd-widget>
+        </div>
     </div>
 
-    <div class="row">
+    <div class="row" ng-show="userType == 'user'">
         <div class="col-lg-6">
             <rd-widget class="custom-widget-wrap">
                 <rd-widget-header icon="fa-users" title="在线时长分布">
@@ -90,6 +105,43 @@
                 <rd-widget-body classes="large no-padding">
                     <rd-loading ng-if="isLoadingData"></rd-loading>
                     <div id="working-time-chart">
+
+                    </div>
+                </rd-widget-body>
+            </rd-widget>
+        </div>
+    </div>
+
+    <div class="row" ng-show="userType == 'group' || firstInit">
+        <div class="col-lg-6">
+            <rd-widget class="custom-widget-wrap">
+                <rd-widget-header icon="fa-users" title="本地登录时间">
+                    <div class="btn-group btn-group-xs">
+                        <button type="button" ng-click="setSearchType('day')" class="btn btn-default" ng-class="{'btn-primary': searchType == 'day'}">最近一天</button>
+                        <button type="button" ng-click="setSearchType('week')" class="btn btn-default" ng-class="{'btn-primary': searchType == 'week'}">最近七天</button>
+                        <button type="button" ng-click="setSearchType('month')" class="btn btn-default" ng-class="{'btn-primary': searchType == 'month'}">最近三十天</button>
+                    </div>
+                </rd-widget-header>
+                <rd-widget-body classes="large no-padding">
+                    <rd-loading ng-if="isLoadingData"></rd-loading>
+                    <div id="group-local-chart">
+
+                    </div>
+                </rd-widget-body>
+            </rd-widget>
+        </div>
+        <div class="col-lg-6">
+            <rd-widget class="custom-widget-wrap">
+                <rd-widget-header icon="fa-users" title="工作时间">
+                    <div class="btn-group btn-group-xs">
+                        <button type="button" ng-click="setSearchType('day')" class="btn btn-default" ng-class="{'btn-primary': searchType == 'day'}">最近一天</button>
+                        <button type="button" ng-click="setSearchType('week')" class="btn btn-default" ng-class="{'btn-primary': searchType == 'week'}">最近七天</button>
+                        <button type="button" ng-click="setSearchType('month')" class="btn btn-default" ng-class="{'btn-primary': searchType == 'month'}">最近三十天</button>
+                    </div>
+                </rd-widget-header>
+                <rd-widget-body classes="large no-padding">
+                    <rd-loading ng-if="isLoadingData"></rd-loading>
+                    <div id="group-working-chart">
 
                     </div>
                 </rd-widget-body>

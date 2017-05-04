@@ -78,7 +78,8 @@ function DashboardCtrl($rootScope, $scope, $timeout, $interval, $http) {
                 $scope.computers = result.data;
                 if (tempIndex != -1) {
                     $scope.selectComputer(tempIndex);
-                } else {
+                }
+                if ($scope.selectedComputer == -1) {
                     $scope.alerts.push({
                         type: 'warning',
                         msg: '当前没有计算机在线'

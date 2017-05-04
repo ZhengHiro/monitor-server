@@ -271,4 +271,23 @@ router.get('/statistics-info', body(), function* (next) {
     };
 });
 
+//根据小组获取统计数据
+router.get('/group/statistics-info', body(), function* (next) {
+    var group = this.query.group;
+    var type = this.query.type; // 'day' || 'week' || 'month'
+
+    try {
+        var result = yield service.getStatisticsInfoByGroup(group, type);
+    } catch (e) {
+        console.error(e);
+        this.throw(500, '获取统计数据失败');
+    }
+
+    this.body = {
+        status: 200,
+        data: result,
+        message: 'success'
+    };
+});
+
 module.exports = router;
