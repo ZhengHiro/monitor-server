@@ -232,13 +232,36 @@ router.post('/pc-info', body(), function* (next) {
     var fields = this.request.fields;
     var address = fields.address;
     var nickname = fields.nickname;
-    var group = parseInt(fields.group) || 0;
+    var group = fields.group;
 
     try {
         var result = yield service.setPCInfo(address, nickname, group);
     } catch (e) {
         console.log(e);
         throw('设置计算机昵称失败');
+    }
+
+    this.body = {
+        status: 200,
+        data: result,
+        message: 'success'
+    };
+});
+
+
+/**
+ * 数据统计
+ */
+//获取统计数据
+router.get('/statistics-info', body(), function* (next) {
+    var address = this.query.address;
+    var type = this.query.type; // 'day' || 'week' || 'month'
+
+    try {
+        var result = yield service.getStatisticsInfo(address, type);
+    } catch (e) {
+        console.error(e);
+        this.throw(500, '获取统计数据失败');
     }
 
     this.body = {

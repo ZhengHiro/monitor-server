@@ -1,0 +1,99 @@
+<div ng-controller="StatisticsCtrl">
+    <div class="row">
+        <div class="col-lg-6">
+            <rd-widget>
+                <rd-widget-header icon="fa-users" title="计算机">
+                    <div class="btn-group btn-group-xs">
+                        <button type="button" ng-click="setUserType('user')" class="btn btn-default" ng-class="{'btn-primary': userType == 'user'}">用户</button>
+                        <button type="button" ng-click="setUserType('group')" class="btn btn-default" ng-class="{'btn-primary': userType == 'group'}">小组</button>
+                    </div>
+                </rd-widget-header>
+                <rd-widget-body classes="large no-padding">
+                    <div class="table-responsive">
+                        <rd-loading ng-if="isLoadingComputers"></rd-loading>
+                        <table class="table computer-table" ng-if="!isLoadingComputers && userType == 'user'">
+                            <thead>
+                            <tr>
+                                <th>MAC地址</th>
+                                <th>昵称</th>
+                                <th>小组</th>
+                            </thead>
+                            <tbody >
+                            <tr ng-click="selectComputer(key)" ng-repeat="(key, value) in computers" ng-class="{'bg-primary': key == selectedComputer}">
+                                <td ng-bind="value.address"></td>
+                                <td ng-bind="value.nickname"></td>
+                                <td ng-bind="value.group"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <table class="table computer-table" ng-if="!isLoadingComputers && userType == 'group'">
+                            <thead>
+                            <tr>
+                                <th>小组名称</th>
+                                <th>计算机数量</th>
+                            </thead>
+                            <tbody >
+                            <tr ng-click="selectGroup(key)" ng-repeat="(key, value) in groups" ng-class="{'bg-primary': key == selectedComputer}">
+                                <td ng-bind="value.name"></td>
+                                <td ng-bind="value.computers.length"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </rd-widget-body>
+            </rd-widget>
+        </div>
+        <div class="col-lg-6" class="custom-widget-wrap">
+            <rd-widget>
+                <rd-widget-header icon="fa-eye" title="占用率最高进程">
+                    <div class="btn-group btn-group-xs">
+                        <button type="button" ng-click="setSearchType('day')" class="btn btn-default" ng-class="{'btn-primary': searchType == 'day'}">最近一天</button>
+                        <button type="button" ng-click="setSearchType('week')" class="btn btn-default" ng-class="{'btn-primary': searchType == 'week'}">最近七天</button>
+                        <button type="button" ng-click="setSearchType('month')" class="btn btn-default" ng-class="{'btn-primary': searchType == 'month'}">最近三十天</button>
+                    </div>
+                </rd-widget-header>
+                <rd-widget-body classes="large no-padding">
+                    <rd-loading ng-if="isLoadingData"></rd-loading>
+                    <div id="process-rate-chart"></div>
+                </rd-widget-body>
+            </rd-widget>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6">
+            <rd-widget class="custom-widget-wrap">
+                <rd-widget-header icon="fa-users" title="在线时长分布">
+                    <div class="btn-group btn-group-xs">
+                        <button type="button" ng-click="setSearchType('day')" class="btn btn-default" ng-class="{'btn-primary': searchType == 'day'}">最近一天</button>
+                        <button type="button" ng-click="setSearchType('week')" class="btn btn-default" ng-class="{'btn-primary': searchType == 'week'}">最近七天</button>
+                        <button type="button" ng-click="setSearchType('month')" class="btn btn-default" ng-class="{'btn-primary': searchType == 'month'}">最近三十天</button>
+                    </div>
+                </rd-widget-header>
+                <rd-widget-body classes="large no-padding">
+                    <rd-loading ng-if="isLoadingData"></rd-loading>
+                    <div id="local-time-chart">
+
+                    </div>
+                </rd-widget-body>
+            </rd-widget>
+        </div>
+        <div class="col-lg-6">
+            <rd-widget class="custom-widget-wrap">
+                <rd-widget-header icon="fa-users" title="工作时长分布">
+                    <div class="btn-group btn-group-xs">
+                        <button type="button" ng-click="setSearchType('day')" class="btn btn-default" ng-class="{'btn-primary': searchType == 'day'}">最近一天</button>
+                        <button type="button" ng-click="setSearchType('week')" class="btn btn-default" ng-class="{'btn-primary': searchType == 'week'}">最近七天</button>
+                        <button type="button" ng-click="setSearchType('month')" class="btn btn-default" ng-class="{'btn-primary': searchType == 'month'}">最近三十天</button>
+                    </div>
+                </rd-widget-header>
+                <rd-widget-body classes="large no-padding">
+                    <rd-loading ng-if="isLoadingData"></rd-loading>
+                    <div id="working-time-chart">
+
+                    </div>
+                </rd-widget-body>
+            </rd-widget>
+        </div>
+    </div>
+</div>

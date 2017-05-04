@@ -26,7 +26,7 @@
                                         <input type="text" name="nickname" ng-model="editNickname" ng-model-options="{ getterSetter: true }">
                                     </td>
                                     <td ng-show="key == editIndex">
-                                        <input type="number" name="group" ng-model="editGroup" ng-model-options="{ getterSetter: true }">
+                                        <input type="text" name="group" ng-model="editGroup" ng-model-options="{ getterSetter: true }">
                                     </td>
                                     <td ng-if="key != editIndex">
                                         <button type="button" class="btn btn-primary" ng-click="edit(key)">编辑</button>
@@ -44,25 +44,6 @@
                     </div>
                 </rd-widget-body>
             </rd-widget>
-        </div>
-    </div>
-</div>
-
-<!-- Modal -->
-<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="myModalLabel">Modal title</h4>
-            </div>
-            <div class="modal-body">
-                ...
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
-            </div>
         </div>
     </div>
 </div>

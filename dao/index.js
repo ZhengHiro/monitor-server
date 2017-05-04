@@ -661,3 +661,21 @@ exports.getProcessRate = function* (address, dateTime) {
 
     return rows;
 };
+
+//获取内存占用率
+exports.getProcessRateByTime = function* (address, startTime, endTime) {
+    try {
+        var rows = yield ProcessRate.find({
+            address: address,
+            dateTime: {
+                $lte : endTime,
+                $gte : startTime
+            }
+        });
+    } catch (e) {
+        console.log(e);
+        throw('DAO: 获取内存占用率失败');
+    }
+
+    return rows;
+};

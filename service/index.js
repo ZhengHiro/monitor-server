@@ -86,7 +86,7 @@ exports.getMonitorInfo = function* (address, startTime, endTime) {
             DAO.getScreenShot(address, startTime, endTime),
             DAO.getProcessInfo(address, startTime, endTime)
         ];
-        
+
     } catch (e) {
         console.log(e);
         throw('SERVICE: 获取监控信息失败');
@@ -147,4 +147,66 @@ exports.getProcessRate = function* (address, dateTime) {
     }
 
     return result;
+};
+
+
+//统计数据
+exports.getStatisticsInfo = function* (address, type) {
+    var endTime = Math.floor(new Date().getTime() / 1000), startTime;
+    var endDate = new Date();
+    endDate.setHours(0);
+    endDate.setMinutes(0);
+    endDate.setSeconds(0);
+    endDateTime = Math.floor(endDate.getTime()/1000);
+    if (type == 'day') {
+        startTime = endDateTime - 24*60*60;
+    } else if (type == 'week') {
+        startTime = endDateTime - 7*24*60*60;
+    } else if (type == 'month') {
+        startTime = endDateTime - 30*24*60*60;
+    }
+    try {
+        var [onlineTime, processRate] = yield [
+            DAO.getOnlineTime(address,startTime, endTime),
+            DAO.getProcessRateByTime(address, startTime, endTime)
+        ];
+
+        var totalTime = 0, remoteTime = 0, localTime = 0, workingTime = 0;
+        for (let i = 0, iL = onlineTime.length; i < iL; i++) {
+            totalTime += onlineTime[i].totalTime;
+            remoteTime += onlineTime[i].remoteTime;
+            localTime += onlineTime[i].localTime;
+            workingTime += onlineTime[i].workingTime;
+        }
+
+        var rates = {};
+        for (let i = 0, iL = processRate.length; i < iL; i++) {
+            if (!rates[processRate[i].processName]) {
+                rates[processRate[i].processName] = 0
+                rates[processRate[i].processName] += processRate[i].totalMem;
+            } else {
+                rates[processRate[i].processName] += processRate[i].totalMem;
+            }
+        }
+        console.log(rates);
+        processRate = [];
+        for (var key in rates) {
+            processRate.push({
+                processName: key,
+                totalMem: rates[key]
+            });
+        }
+    } catch (e) {
+        console.log(e);
+        throw('SERVICE: 获取监控信息失败');
+    }
+
+    return {
+        address: address,
+        totalTime: totalTime,
+        remoteTime: remoteTime,
+        localTime: localTime,
+        workingTime: workingTime,
+        processRate: processRate
+    };
 };

@@ -19,6 +19,10 @@ angular.module('RDash').config(['$stateProvider', '$urlRouterProvider',
                 url: '/edit-info',
                 templateUrl: 'templates/editInfo.html'
             })
+            .state('statistics', {
+                url: '/statistics',
+                templateUrl: 'templates/statistics.html'
+            })
             .state('history', {
                 url: '/history',
                 templateUrl: 'templates/history.html'

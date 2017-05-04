@@ -3,7 +3,7 @@ var Schema = new mongoose.Schema({
     index: Number,
     address: String,
     nickname: String,
-    group: Number,
+    group: String,
     lastOnline: Number,
     remoteTime: Number,
     localTime: Number

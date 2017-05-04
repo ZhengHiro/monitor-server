@@ -32,11 +32,14 @@
 .date-selector .next-year {
     margin-right: 10px;
 }
-#online-time-chart, #local-time-chart, #process-rate-chart {
+#online-time-chart, #local-time-chart, #process-rate-chart, #working-time-chart {
     width: 100%;
     height: 350px;
 }
 
 .widget .widget-body.no-padding {
     overflow: hidden;
+}
+.widget .scroll-widget .widget-body.no-padding {
+    overflow: scroll;
 }
