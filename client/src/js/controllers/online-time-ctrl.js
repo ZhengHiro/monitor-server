@@ -259,8 +259,6 @@ function OnlineTimeCtrl($rootScope, $scope, $timeout, $http) {
         });
     };
 
-    $scope.getOnlineTime();
-
     $scope.isLoadingSystemOnce = false;
 
     $scope.getComputerMonitor = function (date) {
