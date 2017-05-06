@@ -289,6 +289,10 @@ function OnlineTimeCtrl($rootScope, $scope, $timeout, $http) {
                 var date;
                 var series = [];
 
+                data.systemInfo.sort(function(a, b) {
+                    return a.time - b.time;
+                });
+
                 data.systemInfo.forEach(function(row) {
                     date = new Date(row.time * 1000);
                     memory.push({
