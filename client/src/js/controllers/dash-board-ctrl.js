@@ -130,6 +130,7 @@ function DashboardCtrl($rootScope, $scope, $timeout, $interval, $http) {
                 var data = result.data;
                 var memory = [];
                 var date;
+                var series = [];
 
                 data.systemInfo.sort(function(a, b) {
                     return a.time - b.time;
