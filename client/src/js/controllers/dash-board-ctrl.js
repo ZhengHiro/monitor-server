@@ -130,7 +130,10 @@ function DashboardCtrl($rootScope, $scope, $timeout, $interval, $http) {
                 var data = result.data;
                 var memory = [];
                 var date;
-                var series = [];
+
+                data.systemInfo.sort(function(a, b) {
+                    return a.time - b.time;
+                });
 
                 $scope.monitorInfos = data;
                 $scope.targetImage = data.screenInfo[data.screenInfo.length-1].targetName;
