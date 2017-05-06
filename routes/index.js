@@ -206,7 +206,7 @@ router.get('/online-time', body(), function* (next) {
 
     this.body = {
         status: 200,
-        data: result && result[0],
+        data: result,
         message: 'success'
     };
 });
