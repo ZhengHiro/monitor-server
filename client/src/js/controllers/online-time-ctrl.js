@@ -249,6 +249,8 @@ function OnlineTimeCtrl($rootScope, $scope, $timeout, $http) {
                 if (option) {
                     option.calendar.range = $scope.selectYear + '-' + $scope.selectMonth;
                     option.series.data = seriesData;
+			console.log(option);
+			console.log(timeChart);
                     timeChart.setOption(option);
                 }
             } else {
