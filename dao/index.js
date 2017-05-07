@@ -355,7 +355,11 @@ exports.setProcesses = function* (address, time, processes, loopTime = 0) {
                 yield process.save();
 
 
-                var onlineUpdate = {}, timeUpdate = {};
+                var onlineUpdate = {
+                    $set: {}
+                }, timeUpdate = {
+                    $inc: {}
+                };
                 //有进程增减判断成工作状态
                 if ((addProcess.length != 0 || delProcess.length != 0) && !onlineinfo.isWorking) {
                     onlineUpdate.$set.status = onlineinfo.status + HAS_PROCESS;
