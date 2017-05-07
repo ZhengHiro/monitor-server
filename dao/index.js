@@ -1,5 +1,6 @@
 var db = require('../config/mongoose');
 var co = require('co');
+var fs = require('co-fs');
 
 var ComputerInfo = db.model('computer_info');
 var ProcessInfo = db.model('process_info');
@@ -128,7 +129,10 @@ exports.setHeart = function* (address, time, remoteable) {
                     dateTime: dateTime,
                     totalTime: 5,
                     remoteTime: 5,
-                    localTime: 0
+                    localTime: 0,
+                    workingTime: 0,
+                    studyTime: 0,
+                    gameTime: 0
                 });
             } else {
                 timeInfo = new TimeInfo({
@@ -136,7 +140,10 @@ exports.setHeart = function* (address, time, remoteable) {
                     dateTime: dateTime,
                     totalTime: 5,
                     remoteTime: 0,
-                    localTime: 5
+                    localTime: 5,
+                    workingTime: 0,
+                    studyTime: 0,
+                    gameTime: 0
                 });
             }
 
@@ -259,7 +266,22 @@ exports.setProcesses = function* (address, time, processes, loopTime = 0) {
                 date.setMinutes(0);
                 var dateTime = parseInt(date.getTime()/1000);
 
+
+                //获取常见进程列表
+                var json = yield fs.readFile('./config/process.json');
+                json = JSON.parse(json);
+                var workTag = false, gameTag = false;
+
                 for (let j = 0, jL = processes.length; j < jL; j++) {
+                    if (!workTag && !gameTag) {
+                        if (json[processes.processName] && json[processes.processName] == 'work') {
+                            workTag = true;
+                        }
+                        if (json[processes.processName] && json[processes.processName] == 'game') {
+                            gameTag = true;
+                        }
+                    }
+
                     var processRateRow = yield ProcessRate.find({
                         address: address,
                         dateTime: dateTime,
@@ -286,6 +308,7 @@ exports.setProcesses = function* (address, time, processes, loopTime = 0) {
                 }
 
                 tag = true;
+
 
                 //进程分析
                 var oldRows = yield ProcessInfo.find({
@@ -332,36 +355,34 @@ exports.setProcesses = function* (address, time, processes, loopTime = 0) {
                 yield process.save();
 
 
+                var onlineUpdate = {}, timeUpdate = {};
                 //有进程增减判断成工作状态
-                if ((addProcess.length != 0 || delProcess.length != 0) && onlineinfo.isWorking) {
-                    yield OnlineInfo.update({
-                        address: address,
-                        time: onlineinfo.time
-                    },{
-                        $set: {
-                            status: onlineinfo.status + HAS_PROCESS,
-                            isWorking: 1
-                        }
-                    });
-
-                    yield TimeInfo.update({
-                        address: address,
-                        dateTime: dateTime
-                    }, {
-                        $inc: {
-                            workingTime: 5
-                        }
-                    });
+                if ((addProcess.length != 0 || delProcess.length != 0) && !onlineinfo.isWorking) {
+                    onlineUpdate.$set.status = onlineinfo.status + HAS_PROCESS;
+                    onlineUpdate.$set.isWorking = 1;
+                    timeUpdate.$inc.workingTime = 5;
                 } else {
-                    yield OnlineInfo.update({
-                        address: address,
-                        time: onlineinfo.time
-                    },{
-                        $set: {
-                            status: onlineinfo.status + HAS_PROCESS
-                        }
-                    });
+                    onlineUpdate.$set.status = onlineinfo.status + HAS_PROCESS;
                 }
+
+                if (workTag) {
+                    onlineUpdate.$set.isStudy = 1;
+                    timeUpdate.$inc.studyTime = 5;
+                }
+                if (gameTag) {
+                    onlineUpdate.$set.isGame = 1;
+                    timeUpdate.$inc.gameTime = 5;
+                }
+
+                yield OnlineInfo.update({
+                    address: address,
+                    time: onlineinfo.time
+                }, onlineUpdate);
+
+                yield TimeInfo.update({
+                    address: address,
+                    dateTime: dateTime
+                }, timeUpdate);
 
                 break;
             }
