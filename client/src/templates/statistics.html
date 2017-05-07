@@ -85,10 +85,10 @@
                         <button type="button" ng-click="setSearchType('month')" class="btn btn-default" ng-class="{'btn-primary': searchType == 'month'}">最近三十天</button>
                     </div>
                 </rd-widget-header>
-                <rd-widget-body classes="large no-padding">
+                <rd-widget-body classes="large">
                     <rd-loading ng-if="isLoadingData"></rd-loading>
                     <div ng-repeat="(key, value) in analysisReport">
-                        <div class="message">
+                        <div class="custom-message">
                             <span ng-class="value.type">{{ value.content }}</span>
                         </div>
                         <hr/>
