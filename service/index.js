@@ -175,7 +175,7 @@ exports.getStatisticsInfo = function* (address, type) {
             DAO.getProcessRateByTime(address, startTime, endTime)
         ];
 
-        var totalTime = 0, remoteTime = 0, localTime = 0, workingTime = 0, studyTime, gameTime;
+        var totalTime = 0, remoteTime = 0, localTime = 0, workingTime = 0, studyTime = 0, gameTime = 0;
         for (let i = 0, iL = onlineTime.length; i < iL; i++) {
             totalTime += onlineTime[i].totalTime;
             remoteTime += onlineTime[i].remoteTime;
@@ -188,7 +188,7 @@ exports.getStatisticsInfo = function* (address, type) {
         var rates = {};
         for (let i = 0, iL = processRate.length; i < iL; i++) {
             if (!rates[processRate[i].processName]) {
-                rates[processRate[i].processName] = 0
+                rates[processRate[i].processName] = 0;
                 rates[processRate[i].processName] += processRate[i].totalMem;
             } else {
                 rates[processRate[i].processName] += processRate[i].totalMem;
