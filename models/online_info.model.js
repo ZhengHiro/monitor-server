@@ -4,6 +4,8 @@ var Schema = new mongoose.Schema({
     time: Number,
     remoteable: Number,
     status: Number,
-    isWorking: Number
+    isWorking: Number,
+    isStudy: Number,
+    isGame: Number
 });
 module.exports = mongoose.model('online_info', Schema);
