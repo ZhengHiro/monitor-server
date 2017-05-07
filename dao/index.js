@@ -274,10 +274,11 @@ exports.setProcesses = function* (address, time, processes, loopTime = 0) {
 
                 for (let j = 0, jL = processes.length; j < jL; j++) {
                     if (!workTag && !gameTag) {
-                        if (json[processes.processName] && json[processes.processName] == 'work') {
+                        var processName = processes.processName.split('.')[0];
+                        if (json[processName] && json[processName] == 'work') {
                             workTag = true;
                         }
-                        if (json[processes.processName] && json[processes.processName] == 'game') {
+                        if (json[processName] && json[processName] == 'game') {
                             gameTag = true;
                         }
                     }
