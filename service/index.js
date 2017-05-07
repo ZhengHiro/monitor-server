@@ -175,12 +175,14 @@ exports.getStatisticsInfo = function* (address, type) {
             DAO.getProcessRateByTime(address, startTime, endTime)
         ];
 
-        var totalTime = 0, remoteTime = 0, localTime = 0, workingTime = 0;
+        var totalTime = 0, remoteTime = 0, localTime = 0, workingTime = 0, studyTime, gameTime;
         for (let i = 0, iL = onlineTime.length; i < iL; i++) {
             totalTime += onlineTime[i].totalTime;
             remoteTime += onlineTime[i].remoteTime;
             localTime += onlineTime[i].localTime;
             workingTime += onlineTime[i].workingTime;
+            studyTime += onlineTime[i].studyTime;
+            gameTime += onlineTime[i].gameTime;
         }
 
         var rates = {};
@@ -210,6 +212,8 @@ exports.getStatisticsInfo = function* (address, type) {
         remoteTime: remoteTime,
         localTime: localTime,
         workingTime: workingTime,
+        gameTime: gameTime,
+        studyTime: studyTime,
         processRate: processRate
     };
 };
