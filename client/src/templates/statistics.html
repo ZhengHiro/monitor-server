@@ -76,7 +76,24 @@
     </div>
 
     <div class="row" ng-show="userType == 'user'">
-        <div class="col-lg-6">
+        <div class="col-lg-4">
+            <rd-widget>
+                <rd-widget-header icon="fa-users" title="统计分析结果">
+                    <div class="btn-group btn-group-xs">
+                        <button type="button" ng-click="setSearchType('day')" class="btn btn-default" ng-class="{'btn-primary': searchType == 'day'}">最近一天</button>
+                        <button type="button" ng-click="setSearchType('week')" class="btn btn-default" ng-class="{'btn-primary': searchType == 'week'}">最近七天</button>
+                        <button type="button" ng-click="setSearchType('month')" class="btn btn-default" ng-class="{'btn-primary': searchType == 'month'}">最近三十天</button>
+                    </div>
+                </rd-widget-header>
+                <rd-widget-body classes="large no-padding">
+                    <rd-loading ng-if="isLoadingData"></rd-loading>
+                    <div class="message" ng-repeat="(key, value) in analysisReport">
+                        <span ng-class="value.type">{{ value.content }}</span>
+                    </div>
+                </rd-widget-body>
+            </rd-widget>
+        </div>
+        <div class="col-lg-4">
             <rd-widget class="custom-widget-wrap">
                 <rd-widget-header icon="fa-users" title="在线时长分布">
                     <div class="btn-group btn-group-xs">
@@ -93,7 +110,7 @@
                 </rd-widget-body>
             </rd-widget>
         </div>
-        <div class="col-lg-6">
+        <div class="col-lg-4">
             <rd-widget class="custom-widget-wrap">
                 <rd-widget-header icon="fa-users" title="工作时长分布">
                     <div class="btn-group btn-group-xs">

@@ -13,6 +13,7 @@ function StatisticsCtrl($scope, $http, $interval, $timeout) {
 
     $scope.userType = 'user';
     $scope.searchType = 'day';
+    $scope.analysisReport = [];
 
     $scope.setUserType = function(type) {
         $scope.userType = type;
@@ -339,6 +340,45 @@ function StatisticsCtrl($scope, $http, $interval, $timeout) {
                 ];
                 workingTimeChart.setOption(workingTimeOption);
 
+
+                //分析结果
+                if (data.gameTime / data.workingTime > 0.3) {
+                    $scope.analysisReport.push({
+                        type: 'text-danger',
+                        content: '游戏时间占电脑工作时间的' + (data.gameTime*100 / data.workingTime).toFixed(2) + '%!使用电脑玩游戏时间较多！'
+                    });
+                }
+                if (data.studyTime / data.workingTime > 0.5) {
+                    $scope.analysisReport.push({
+                        type: 'text-primary',
+                        content: '学习时间占电脑工作时间的' + (data.studyTime*100 / data.workingTime).toFixed(2) + '%!比较认真学习！'
+                    });
+                }
+                if (!data.gameTime && data.gameTime > 0.8*data.studyTime) {
+                    $scope.analysisReport.push({
+                        type: 'text-danger',
+                        content: '游戏时间占比较高!使用电脑玩游戏较多！'
+                    });
+                }
+                if (data.workingTime / data.totalTime < 0.7) {
+                    $scope.analysisReport.push({
+                        type: 'text-danger',
+                        content: '挂机时间占总在线时间的' + ((data.totalTime-data.workingTime)*100 / data.totalTime).toFixed(2) + '%!挂机时间较长！'
+                    });
+                }
+                if (data.remoteTime / data.totalTime > 0.7) {
+                    $scope.analysisReport.push({
+                        type: 'text-danger',
+                        content: '远程在线时间占总在线时间的' + (data.remoteTime*100 / data.totalTime).toFixed(2) + '%!长时间不在实验室！'
+                    });
+                }
+                if ($scope.analysisReport.length == 0) {
+                    $scope.analysisReport.push({
+                        type: 'text-warning',
+                        content: '数据较少，无分析数据'
+                    });
+                }
+
             } else {
                 console.log(response);
             }
@@ -382,6 +422,7 @@ function StatisticsCtrl($scope, $http, $interval, $timeout) {
                 groupOnlineChart.setOption(groupOnlineChartOption);
                 groupLocalChart.setOption(groupLocalChartOption);
                 groupWorkingChart.setOption(groupWorkingChartOption);
+
             } else {
                 console.log(response);
             }
