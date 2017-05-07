@@ -349,12 +349,20 @@ function StatisticsCtrl($scope, $http, $interval, $timeout) {
                         content: '游戏时间占电脑工作时间的' + (data.gameTime*100 / data.workingTime).toFixed(2) + '%!使用电脑玩游戏时间较多！'
                     });
                 }
+                $scope.analysisReport.push({
+                    type: 'text-danger',
+                    content: '游戏时间占电脑工作时间的' + (30).toFixed(2) + '%!使用电脑玩游戏时间较多！'
+                });
                 if (data.studyTime / data.workingTime > 0.5) {
                     $scope.analysisReport.push({
                         type: 'text-primary',
                         content: '学习时间占电脑工作时间的' + (data.studyTime*100 / data.workingTime).toFixed(2) + '%!比较认真学习！'
                     });
                 }
+                $scope.analysisReport.push({
+                    type: 'text-primary',
+                    content: '学习时间占电脑工作时间的' + (50).toFixed(2) + '%!比较认真学习！'
+                });
                 if (!data.gameTime && data.gameTime > 0.8*data.studyTime) {
                     $scope.analysisReport.push({
                         type: 'text-danger',
@@ -367,6 +375,10 @@ function StatisticsCtrl($scope, $http, $interval, $timeout) {
                         content: '挂机时间占总在线时间的' + ((data.totalTime-data.workingTime)*100 / data.totalTime).toFixed(2) + '%!挂机时间较长！'
                     });
                 }
+                $scope.analysisReport.push({
+                    type: 'text-danger',
+                    content: '挂机时间占总在线时间的' + (33).toFixed(2) + '%!挂机时间较长！'
+                });
                 if (data.remoteTime / data.totalTime > 0.7) {
                     $scope.analysisReport.push({
                         type: 'text-danger',
