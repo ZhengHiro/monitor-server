@@ -181,8 +181,12 @@ exports.getStatisticsInfo = function* (address, type) {
             remoteTime += onlineTime[i].remoteTime;
             localTime += onlineTime[i].localTime;
             workingTime += onlineTime[i].workingTime;
-            studyTime += onlineTime[i].studyTime;
-            gameTime += onlineTime[i].gameTime;
+	    if (onlineTime[i].studyTime) {
+	            studyTime += onlineTime[i].studyTime;
+	    }
+	    if (onlineTime[i].gameTime) {
+	            gameTime += onlineTime[i].gameTime;
+	    }
         }
 
         var rates = {};
