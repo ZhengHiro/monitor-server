@@ -282,6 +282,7 @@ function StatisticsCtrl($scope, $http, $interval, $timeout) {
 
     $scope.getStatisticsInfo = function() {
         $scope.isLoadingData = true;
+        $scope.analysisReport = [];
 
         $http({
             method: 'GET',

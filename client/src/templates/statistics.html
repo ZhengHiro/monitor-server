@@ -87,8 +87,11 @@
                 </rd-widget-header>
                 <rd-widget-body classes="large no-padding">
                     <rd-loading ng-if="isLoadingData"></rd-loading>
-                    <div class="message" ng-repeat="(key, value) in analysisReport">
-                        <span ng-class="value.type">{{ value.content }}</span>
+                    <div ng-repeat="(key, value) in analysisReport">
+                        <div class="message">
+                            <span ng-class="value.type">{{ value.content }}</span>
+                        </div>
+                        <hr/>
                     </div>
                 </rd-widget-body>
             </rd-widget>
